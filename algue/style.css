@@ -1,0 +1,28 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  background-color: black;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+canvas {
+  inset: 0;
+  background: radial-gradient(ellipse at top, #00000000, #000000),
+    radial-gradient(circle at 75% 0%, #00cefe 0, #00cefe00 50%),
+    linear-gradient(#0133fb, #000000);
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}

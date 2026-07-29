@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/eye.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>red vs green vs blue</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root {
+        box-sizing: border-box;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+          sans-serif;
+        transition-timing-function: ease-out;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+        background-color: black;
+      }
+      body {
+        clip-path: "polygon(50% 0, 100% 50%, 50% 100%, 0 50%)";
+      }
+      .shadow-interior {
+        box-shadow: inset 0 2px 1px 2px #00000055;
+        border: 1px solid black;
+      }
+      .btn {
+        border: 1px solid black;
+        box-shadow: inset 0 0 0px #000000, inset 0 5px 1px #ffffffaa,
+          inset 0 -5px 1px 2px #00000055;
+        transition-duration: 150ms;
+        border-radius: 4px;
+      }
+      .selected {
+        box-shadow: inset 0 5px 0px #000000, inset 0 10px 1px #ffffffaa,
+          inset 0 0px 1px 2px #00000055;
+        color: #000000aa;
+      }
+      .selected > span {
+        transform: translate(-50%, calc(-50% + 5px));
+      }
+      .bottom-btn {
+        border-radius: 4px 4px 0.75rem 0.75rem;
+      }
+      .bg-light {
+        background-color: #aaaaaa;
+      }
+      .inset-shadow {
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 0 1px 5px inset #000, inset 0 2px 1px 4px #ffffff55;
+      }
+      .inset-shadow::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        /* background: linear-gradient(
+          0deg,
+          #222222ff,
+          #0000aa00,
+          #0000aa00,
+          #222222ff
+        ); */
+        /* background-size: cover; */
+        background-size: 30vh;
+        background-image: url("/image.png");
+        background-position: center;
+        z-index: 1;
+        opacity: 0.2;
+        mix-blend-mode: hard-light;
+      }
+      .stripes {
+        background: repeating-linear-gradient(
+          80deg,
+          #aa3333,
+          #aa3333 2px,
+          #552222 2px,
+          #552222 4px
+        );
+        box-shadow: inset 1px 0 2px #000000, inset -1px 0 2px #000000;
+      }
+      .gradient-background {
+        background: linear-gradient(#000000ee, #00000000);
+      }
+      .stripes-yellow {
+        background: linear-gradient(0deg, #00000000, #000000ff),
+          repeating-linear-gradient(
+            45deg,
+            #aaaa33,
+            #aaaa33 20px,
+            #555522 20px,
+            #555522 40px
+          );
+      }
+      .block-border {
+        outline: 1px solid black;
+        border: 1px solid #ffffff55;
+        box-shadow: 0 10px 20px #000000;
+      }
+      canvas {
+        outline: 1px solid white;
+        user-select: none;
+        pointer-events: none;
+      }
+      .font-secondary {
+        font-family: monospace;
+        font-weight: 900;
+      }
+    </style>
+  </head>
+  <body class="bg-light">
+    <canvas
+      class="absolute z-0 inset-[4px] bg-black rounded-2xl inset-shadow"
+      id="canvas"
+    ></canvas>
+    <div
+      class="fixed z-50 w-full h-full top-0 left-0 gradient-background"
+      id="win"
+    >
+      <div
+        class="block-border absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 sm:w-1/3 bg-light gap-4 flex-col flex rounded-xl"
+      >
+        <div
+          class="absolute left-1/3 bottom-full h-screen w-1 -translate-x-1/2 stripes"
+        ></div>
+        <div
+          class="absolute left-2/3 bottom-full h-screen w-1 -translate-x-1/2 stripes"
+        ></div>
+        <div class="font-secondary p-1">
+          <h1 class="text-3xl bg-black text-white rounded-lg p-4 inset-shadow">
+            YOU WON !!
+          </h1>
+        </div>
+        <div class="flex flex-col bg-black bottom-btn">
+          <button class="btn bottom-btn h-20 bg-light" id="restartWin">
+            Play again
+          </button>
+        </div>
+      </div>
+    </div>
+    <div
+      class="fixed w-full h-full top-0 left-0 z-50 gradient-background"
+      id="lose"
+    >
+      <div
+        class="block-border absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 sm:w-1/3 bg-light gap-4 flex-col flex rounded-xl"
+      >
+        <div
+          class="absolute left-1/3 bottom-full h-screen w-1 -translate-x-1/2 stripes"
+        ></div>
+        <div
+          class="absolute left-2/3 bottom-full h-screen w-1 -translate-x-1/2 stripes"
+        ></div>
+        <div class="font-secondary p-1">
+          <h1 class="text-3xl bg-black text-white rounded-lg p-4 inset-shadow">
+            YOU LOSE !!
+          </h1>
+        </div>
+        <div class="flex flex-col bg-black bottom-btn">
+          <button class="btn h-20 bottom-btn bg-light" id="restartLose">
+            Play again
+          </button>
+        </div>
+      </div>
+    </div>
+    <div
+      class="fixed w-full h-full top-0 left-0 z-50 gradient-background"
+      id="select"
+    >
+      <div
+        class="block-border absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 sm:w-1/3 bg-light gap-4 flex-col flex rounded-xl"
+      >
+        <div
+          class="absolute left-1/3 bottom-full h-screen w-1 -translate-x-1/2 stripes"
+        ></div>
+        <div
+          class="absolute left-2/3 bottom-full h-screen w-1 -translate-x-1/2 stripes"
+        ></div>
+        <div class="font-secondary p-1">
+          <h1
+            class="text-3xl bg-black text-white rounded-lg p-4 font-900 inset-shadow"
+          >
+            Choose your color
+          </h1>
+        </div>
+        <p class="inline-flex justify-center items-center gap-2">
+          <span
+            class="h-5 rounded-lg shadow-interior w-5 bg-red-500 block"
+          ></span>
+          <svg
+            class="w-10 h-10 inline-block"
+            viewBox="0 0 24.00 24.00"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="#000000"
+            stroke="#000000"
+            transform="matrix(1, 0, 0, 1, 0, 0)rotate(45)"
+          >
+            <path d="M12,12H22A10,10,0,1,1,12,2h0Z"></path>
+            ➞
+          </svg>
+          <span
+            class="h-5 rounded-lg shadow-interior w-5 bg-green-500 block"
+          ></span>
+          <svg
+            class="w-10 h-10 inline-block"
+            viewBox="0 0 24.00 24.00"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="#000000"
+            stroke="#000000"
+            transform="matrix(1, 0, 0, 1, 0, 0)rotate(45)"
+          >
+            <path d="M12,12H22A10,10,0,1,1,12,2h0Z"></path>
+            ➞
+          </svg>
+          <span
+            class="h-5 rounded-lg shadow-interior w-5 bg-blue-500 block"
+          ></span>
+          <svg
+            class="w-10 h-10 inline-block"
+            viewBox="0 0 24.00 24.00"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="#000000s"
+            stroke="none"
+            transform="matrix(1, 0, 0, 1, 0, 0)rotate(45)"
+          >
+            <path d="M12,12H22A10,10,0,1,1,12,2h0Z"></path>
+            ➞
+          </svg>
+          <span
+            class="h-5 rounded-lg shadow-interior w-5 bg-red-500 block"
+          ></span>
+        </p>
+        <div class="flex flex-col bg-black bottom-btn">
+          <div class="flex">
+            <button class="red w-full h-20 btn bg-red-500" id="redButton">
+              <span
+                class="absolute duration-150 -translate-x-1/2 -translate-y-1/2 font-bold"
+                >Red</span
+              >
+            </button>
+            <button class="blue w-full h-20 btn bg-blue-500" id="blueButton">
+              <span
+                class="absolute duration-150 -translate-x-1/2 -translate-y-1/2 font-bold"
+                >Blue</span
+              >
+            </button>
+            <button class="green w-full h-20 btn bg-green-500" id="greenButton">
+              <span
+                class="absolute duration-150 -translate-x-1/2 -translate-y-1/2 font-bold"
+                >Green</span
+              >
+            </button>
+          </div>
+          <button id="restart" class="btn h-20 bottom-btn font-bold bg-light">
+            Start
+          </button>
+        </div>
+      </div>
+    </div>
+    <div
+      class="fixed z-20 top-[1rem] left-[1rem] right-[1rem] h-2 rounded-full bg-green-500 overflow-hidden"
+      id="scoreBar"
+    >
+      <div
+        class="absolute duration-100 left-0 top-0 h-full bg-red-500"
+        id="redBar"
+      ></div>
+      <div
+        class="absolute duration-100 right-0 top-0 h-full bg-blue-500"
+        id="blueBar"
+      ></div>
+    </div>
+    <div
+      class="bottom-4 block-border rounded-xl z-20 left-4 absolute p-2 bg-light flex justify-center gap-2 items-center"
+    >
+      <div class="flex flex-col font-bold">
+        <p>Red :</p>
+        <p>Blue :</p>
+        <p>Green :</p>
+      </div>
+      <div
+        class="flex flex-col bg-black rounded-lg inset-shadow py-2 w-14 justify-center items-center"
+      >
+        <span id="red" class="text-white px-4 font-secondary">33</span>
+        <span id="blue" class="text-white px-4 font-secondary">33</span>
+        <span id="green" class="text-white px-4 font-secondary">33</span>
+      </div>
+    </div>
+    <div
+      class="bottom-4 block-border z-20 right-4 bg-light p-2 absolute flex rounded-xl gap-2"
+    >
+      <div
+        id="pause"
+        class="h-20 aspect-square flex justify-center items-center text-3xl btn rounded-lg"
+      >
+        <span
+          class="absolute duration-150 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-bold"
+        >
+          ⏯
+        </span>
+      </div>
+    </div>
+    <div class="text-white left-1/2 bottom-2 opacity-25 -translate-x-1/2 fixed">
+      <p class="text-sm font-light">Made by Akira Valade</p>
+    </div>
+    <div class="fixed z-50 inset-0 bg-black stripes-yellow" id="reveal"></div>
+    <canvas class="fixed z-50 inset-0 w-full h-full" id="canvas-click"></canvas>
+    <script>
+      // use a script tag or an external JS file
+      document.addEventListener("DOMContentLoaded", (event) => {
+        // gsap code here!
+      });
+    </script>
+    <script type="module" src="/draw.js"></script>
+    <script type="module" src="/rockPaperCisors.js"></script>
+    <script type="module" src="/anim.js"></script>
+    <script type="module" src="/click.js"></script>
+    <!-- <script type="module" src="/index.js"></script> -->
+  </body>
+</html>
