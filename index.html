@@ -1,61 +1,343 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/public/favicon.ico" />
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Akira Valade</title>
-    <meta
-      name="title"
-      content="Akira Valade's Portfolio. Developer, 3D Artist and graphic designer."
-    />
-    <meta
-      name="og:title"
-      content="Akira Valade's Portfolio. Developer, 3D Artist and graphic designer."
-    />
-    <meta name="category" content="portfolio" />
-    <meta name="og:type" content="website" />
-    <meta name="og:url" content="https://AkiraValade.com/" />
-    <meta name="og:image" content="/miniature.png" />
-
-    <meta name="twitter:card" content="summary_large_image" />
+    <title>Canvas Experiments</title>
     <meta
       name="description"
-      content="Portfolio Akira Valade. Ici j'ai réunis tous mes projets les plus intéressants en développement web, creation 2d et 3d."
+      content="A collection of creative coding experiments — canvas, shaders, physics, and generative visuals."
     />
-    <meta name="author" content="Akira Valade" />
-    <meta
-      name="keywords"
-      content="Portfolio Developer 3D Artist graphic designer"
-    />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
+    <style>
+      :root {
+        --bg: #060a08;
+        --bg-alt: #0b1410;
+        --line: #14301f;
+        --green: #39ff8f;
+        --green-dim: #1f8a52;
+        --text: #c9f2d9;
+        --text-dim: #6f9c82;
+        --mono: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular,
+          Menlo, Consolas, monospace;
+      }
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:creator" content="@akkibi11" />
-    <meta name="twitter:title" content="Akira Valade | Portfolio" />
-    <meta
-      name="twitter:description"
-      content="Portfolio Akira Valade. Ici j'ai réunis tous mes projets les plus intéressants en développement web, creation 2d et 3d."
-    />
-    <meta name="twitter:image" content="/miniature.png" />
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--mono);
+        min-height: 100vh;
+        background-image: linear-gradient(
+            var(--line) 1px,
+            transparent 1px
+          ),
+          linear-gradient(90deg, var(--line) 1px, transparent 1px);
+        background-size: 40px 40px;
+        background-position: center;
+        position: relative;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(
+          ellipse at 50% -10%,
+          rgba(57, 255, 143, 0.12),
+          transparent 60%
+        );
+        pointer-events: none;
+      }
+
+      main {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 64px 24px 96px;
+        position: relative;
+      }
+
+      header {
+        margin-bottom: 56px;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--green-dim);
+        border: 1px solid var(--line);
+        padding: 4px 10px;
+        border-radius: 100px;
+        margin-bottom: 20px;
+      }
+
+      .tag::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--green);
+        box-shadow: 0 0 8px var(--green);
+      }
+
+      h1 {
+        font-size: clamp(28px, 5vw, 44px);
+        margin: 0 0 12px;
+        color: #eafff2;
+        letter-spacing: -0.02em;
+      }
+
+      h1 span {
+        color: var(--green);
+        text-shadow: 0 0 18px rgba(57, 255, 143, 0.5);
+      }
+
+      header p {
+        color: var(--text-dim);
+        max-width: 60ch;
+        line-height: 1.6;
+        font-size: 14px;
+      }
+
+      .count {
+        color: var(--text-dim);
+        font-size: 12px;
+        margin-top: 24px;
+        border-top: 1px dashed var(--line);
+        padding-top: 16px;
+      }
+
+      .count strong {
+        color: var(--green);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 14px;
+      }
+
+      .card {
+        position: relative;
+        display: block;
+        background: var(--bg-alt);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 18px 20px;
+        text-decoration: none;
+        color: inherit;
+        overflow: hidden;
+        transition: border-color 0.2s ease, transform 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+
+      .card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--green),
+          transparent
+        );
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+
+      .card:hover {
+        border-color: var(--green-dim);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4),
+          0 0 0 1px rgba(57, 255, 143, 0.15);
+      }
+
+      .card:hover::before {
+        opacity: 1;
+      }
+
+      .card .index {
+        font-size: 11px;
+        color: var(--green-dim);
+        letter-spacing: 0.08em;
+      }
+
+      .card h2 {
+        font-size: 16px;
+        margin: 6px 0 8px;
+        color: #eafff2;
+        font-weight: 600;
+      }
+
+      .card p {
+        margin: 0;
+        font-size: 12.5px;
+        line-height: 1.5;
+        color: var(--text-dim);
+      }
+
+      .card .arrow {
+        position: absolute;
+        right: 18px;
+        top: 18px;
+        color: var(--green-dim);
+        font-size: 14px;
+        transition: transform 0.2s ease, color 0.2s ease;
+      }
+
+      .card:hover .arrow {
+        color: var(--green);
+        transform: translate(3px, -3px);
+      }
+
+      footer {
+        margin-top: 64px;
+        text-align: center;
+        color: var(--text-dim);
+        font-size: 12px;
+      }
+
+      footer a {
+        color: var(--green-dim);
+      }
+    </style>
   </head>
   <body>
-    <div id="root">
-      <h1>Hello</h1>
-      <p>i'm Akira Valade, a developer, 3D artist and graphic designer.</p>
-      <p>
-        This is a collection of projects that I have worked on to learn making
-        creative webdesigns
-      </p>
-      <h2>Algue</h2>
-      <button>
-        <a href="/algue/index.html">Algue</a>
-      </button>
-    </div>
-    <script type="module" src="/src/main.tsx"></script>
+    <main>
+      <header>
+        <div class="tag">canvas-experiments</div>
+        <h1>Creative coding <span>lab</span></h1>
+        <p>
+          A running collection of small, self-contained experiments in
+          canvas, generative visuals, and interaction — physics sims,
+          fractals, noise fields, image manipulation, and more. Each one is
+          a standalone sketch, no build step required.
+        </p>
+        <div class="count"><strong id="proj-count"></strong> experiments</div>
+      </header>
+
+      <div class="grid" id="grid"></div>
+
+      <footer>
+        source on
+        <a href="https://github.com/Akkibi/canvas-experiments">GitHub</a>
+      </footer>
+    </main>
+
+    <script>
+      const projects = [
+        {
+          slug: "algue",
+          name: "Algue",
+          desc: "Seaweed-like strands simulated with simplex noise and a laplacian solver.",
+        },
+        {
+          slug: "automatic-bands",
+          name: "Automatic Bands",
+          desc: "Self-generating bands driven by a laplacian smoothing pass.",
+        },
+        {
+          slug: "blending-shapes",
+          name: "Blending Shapes",
+          desc: "Organic shapes that merge and separate on canvas.",
+        },
+        {
+          slug: "circle-tangent",
+          name: "Circle Tangent",
+          desc: "Exploring tangent geometry between circles.",
+        },
+        {
+          slug: "drop-mouse",
+          name: "Drop Mouse",
+          desc: "Cursor-reactive drop/ripple interaction.",
+        },
+        {
+          slug: "experimenting-shapes",
+          name: "Experimenting Shapes",
+          desc: "Early sketches exploring shape generation and motion.",
+        },
+        {
+          slug: "filter",
+          name: "Filter",
+          desc: "Real-time image filtering on a canvas bitmap.",
+        },
+        {
+          slug: "fractal",
+          name: "Fractal",
+          desc: "Recursive grid-based fractal patterns.",
+        },
+        {
+          slug: "image-manipulation",
+          name: "Image Manipulation",
+          desc: "Pixel-level manipulation of an image on canvas.",
+        },
+        {
+          slug: "music-viz",
+          name: "Music Viz",
+          desc: "Audio-reactive visualizer built on noise fields and smoothing.",
+        },
+        {
+          slug: "pattern",
+          name: "Pattern",
+          desc: "Procedural grid pattern generator.",
+        },
+        {
+          slug: "physics",
+          name: "Physics",
+          desc: "Simple particle/spring physics simulation.",
+        },
+        {
+          slug: "redvsgreenvsblue",
+          name: "Red vs Green vs Blue",
+          desc: "A small interactive color-mixing game.",
+        },
+        {
+          slug: "test-performance",
+          name: "Test Performance",
+          desc: "Particle stress-test for canvas rendering performance.",
+        },
+        {
+          slug: "vortex",
+          name: "Vortex",
+          desc: "Swirling vortex field animation.",
+        },
+        {
+          slug: "wave",
+          name: "Wave",
+          desc: "Wave propagation rendered on canvas.",
+        },
+      ];
+
+      const grid = document.getElementById("grid");
+      document.getElementById("proj-count").textContent = projects.length;
+
+      projects.forEach((p, i) => {
+        const a = document.createElement("a");
+        a.className = "card";
+        a.href = `./${p.slug}/index.html`;
+        a.innerHTML = `
+          <span class="arrow">&#8599;</span>
+          <div class="index">${String(i + 1).padStart(2, "0")}</div>
+          <h2>${p.name}</h2>
+          <p>${p.desc}</p>
+        `;
+        grid.appendChild(a);
+      });
+    </script>
   </body>
 </html>
