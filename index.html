@@ -8,6 +8,12 @@
       name="description"
       content="A collection of creative coding experiments — canvas, shaders, physics, and generative visuals."
     />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cal+Sans&display=swap"
+      rel="stylesheet"
+    />
     <style>
       :root {
         --bg: #060a08;
@@ -17,8 +23,7 @@
         --green-dim: #1f8a52;
         --text: #c9f2d9;
         --text-dim: #6f9c82;
-        --mono: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular,
-          Menlo, Consolas, monospace;
+        --font: "Cal Sans", ui-sans-serif, system-ui, sans-serif;
       }
 
       * {
@@ -34,7 +39,7 @@
       body {
         background: var(--bg);
         color: var(--text);
-        font-family: var(--mono);
+        font-family: var(--font);
         min-height: 100vh;
         background-image: linear-gradient(
             var(--line) 1px,
