@@ -7,6 +7,8 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 import { createTweaks } from "./tweaks.js";
+import { hullPath, linkGeometry, tangentLines } from "./geometry.js";
+import { buildSvg, downloadSvg } from "./export.js";
 
 const params = {
   defaultRadius: 10,
@@ -19,6 +21,9 @@ const params = {
   fillLinks: false,
   fillOpacity: 0.3,
   linkGap: 0,
+  inner: false,
+  innerInset: 4,
+  innerColor: "#000000",
 };
 
 const schema = {
@@ -32,6 +37,14 @@ const schema = {
   fillLinks: { label: "fill links" },
   fillOpacity: { label: "fill opacity", min: 0, max: 1, step: 0.01 },
   linkGap: { label: "link gap", min: 0, max: 80, step: 1 },
+  inner: { label: "inner overlay" },
+  innerInset: { label: "inner inset", min: 1, max: 40, step: 0.5 },
+  innerColor: { label: "inner color" },
+  exportSvg: {
+    label: "export SVG",
+    action: () =>
+      downloadSvg(buildSvg(params, circleList, links, canvas.width, canvas.height)),
+  },
 };
 
 const circleList = [
@@ -51,54 +64,44 @@ const links = [[circleList[0], circleList[1]]];
 
 let drag = null; // { start, from, pointer }
 
-const drawCircle = (circle) => {
+const drawCircle = (circle, radius = circle.radius, color = params.circleColor, alpha = params.circleOpacity) => {
+  if (radius <= 0) return;
   ctx.beginPath();
-  ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
-  ctx.globalAlpha = params.circleOpacity;
-  ctx.fillStyle = params.circleColor;
+  ctx.arc(circle.x, circle.y, radius, 0, Math.PI * 2);
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = color;
   ctx.fill();
   ctx.globalAlpha = 1;
-  ctx.closePath();
 };
 
-const drawTangents = (a, b) => {
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  const dist = Math.hypot(dx, dy);
-  if (dist <= Math.abs(a.radius - b.radius)) return;
-  const ra = a.radius + params.linkGap;
-  const rb = b.radius + params.linkGap;
-  const base = Math.atan2(dy, dx);
-  const offset = Math.acos((a.radius - b.radius) / dist);
-  const TAU = Math.PI * 2;
-
-  if (params.fillLinks) {
-    ctx.beginPath();
-    ctx.arc(a.x, a.y, ra, base + offset, base + TAU - offset);
-    ctx.arc(b.x, b.y, rb, base - offset, base + offset);
-    ctx.closePath();
-    ctx.globalAlpha = params.fillOpacity;
-    ctx.fillStyle = params.linkColor;
-    ctx.fill();
-    ctx.globalAlpha = 1;
-  }
-
-  if (!params.showLines) return;
-  ctx.beginPath();
-  for (const sign of [1, -1]) {
-    const angle = base + sign * offset;
-    ctx.moveTo(a.x + Math.cos(angle) * ra, a.y + Math.sin(angle) * ra);
-    ctx.lineTo(b.x + Math.cos(angle) * rb, b.y + Math.sin(angle) * rb);
-  }
-  ctx.stroke();
+const fillHull = (g, inset, color, alpha) => {
+  const d = hullPath(g, params.linkGap, inset);
+  if (!d) return;
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = color;
+  ctx.fill(new Path2D(d));
+  ctx.globalAlpha = 1;
 };
 
-const drawConnexions = () => {
+const drawConnexions = (geoms) => {
   ctx.strokeStyle = params.linkColor;
   ctx.lineWidth = params.lineWidth;
-  for (const [a, b] of links) {
-    drawTangents(a, b);
+  for (const g of geoms) {
+    if (params.fillLinks) fillHull(g, 0, params.linkColor, params.fillOpacity);
+    if (!params.showLines) continue;
+    ctx.beginPath();
+    for (const [x1, y1, x2, y2] of tangentLines(g, params.linkGap)) {
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+    }
+    ctx.stroke();
   }
+};
+
+const drawInner = (geoms) => {
+  for (const c of circleList) drawCircle(c, c.radius - params.innerInset, params.innerColor, 1);
+  if (!params.fillLinks) return;
+  for (const g of geoms) fillHull(g, params.innerInset, params.innerColor, 1);
 };
 
 const dragRadius = () => {
@@ -131,7 +134,9 @@ const draw = () => {
   for (let circle of circleList) {
     drawCircle(circle);
   }
-  drawConnexions();
+  const geoms = links.map(([a, b]) => linkGeometry(a, b)).filter(Boolean);
+  drawConnexions(geoms);
+  if (params.inner) drawInner(geoms);
   drawDrag();
 };
 

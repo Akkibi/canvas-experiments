@@ -1,6 +1,6 @@
 import React, { useEffect } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
-import { Leva, useControls } from "https://esm.sh/leva@0.10.0?deps=react@18.3.1,react-dom@18.3.1";
+import { Leva, useControls, button } from "https://esm.sh/leva@0.10.0?deps=react@18.3.1,react-dom@18.3.1";
 
 const theme = {
   colors: {
@@ -21,8 +21,10 @@ const theme = {
 const buildConfig = (params, schema) =>
   Object.fromEntries(
     Object.entries(schema).map(([key, def]) => [
-      key,
-      typeof params[key] === "number"
+      def.action ? def.label : key,
+      def.action
+        ? button(def.action)
+        : typeof params[key] === "number"
         ? { value: params[key], min: def.min, max: def.max, step: def.step, label: def.label }
         : { value: params[key], label: def.label },
     ]),
