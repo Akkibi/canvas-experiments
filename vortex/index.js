@@ -1,120 +1,134 @@
-// Get the canvas element and its context
+import { createTweaks } from "../shared/tweaks.js";
+
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
 
-canvas.width = window.innerWidth / 1;
-canvas.height = window.innerHeight / 1;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
 let centerX = canvas.width / 2;
 let centerY = canvas.height / 2;
 
-const blackHoleRadius = 100;
+const params = {
+  blackHoleRadius: 100,
+  segments: 20,
+  spawnEvery: 2,
+  startSpeed: 0.01,
+  speedGain: 0.0001,
+  inwardFactor: 10,
+  spinFactor: 0.5,
+  opacityGain: 0.001,
+  tailStep: 0.1,
+  squash: 0.5,
+  lineWidth: 1,
+  color: "#ffffff",
+  paused: false,
+};
 
-// create particles
+const SKIP_STEPS = 100;
+
+const schema = {
+  skip: { label: `skip ${SKIP_STEPS} steps`, action: () => skip(SKIP_STEPS) },
+  paused: { label: "paused" },
+  blackHoleRadius: { label: "black hole radius", min: 0, max: 400, step: 1 },
+  segments: { label: "tail segments", min: 2, max: 60, step: 1 },
+  spawnEvery: { label: "spawn every (frames)", min: 1, max: 20, step: 1 },
+  startSpeed: { label: "start speed", min: 0.001, max: 0.2, step: 0.001 },
+  speedGain: { label: "speed gain", min: 0, max: 0.002, step: 0.00001 },
+  inwardFactor: { label: "inward factor", min: 1, max: 40, step: 0.5 },
+  spinFactor: { label: "spin factor", min: 0, max: 2, step: 0.01 },
+  opacityGain: { label: "fade-in rate", min: 0.0001, max: 0.05, step: 0.0001 },
+  tailStep: { label: "tail step", min: 0, max: 1, step: 0.01 },
+  squash: { label: "vertical squash", min: 0.1, max: 1.5, step: 0.01 },
+  lineWidth: { label: "line width", min: 0.5, max: 6, step: 0.5 },
+  color: { label: "color" },
+};
+
 const particles = [];
+let frame = 0;
 
-// generate random particles
 const generateParticle = () => {
   particles.push({
-    distance: Math.sqrt(Math.pow(centerX, 2) + Math.pow(centerY, 2)),
-    speed: 0.01,
+    distance: Math.hypot(centerX, centerY),
+    speed: params.startSpeed,
     angle: Math.random() * 360,
     opacity: 0,
   });
 };
 
-// draw black hole
 const drawBlackHole = () => {
   ctx.save();
-  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.translate(centerX, centerY);
   ctx.rotate(Math.PI);
   ctx.beginPath();
-  ctx.arc(0, 0, blackHoleRadius, 0, Math.PI);
-  ctx.fillStyle = "rgba(0, 0, 0, 1)";
+  ctx.arc(0, 0, params.blackHoleRadius, 0, Math.PI);
+  ctx.fillStyle = "#000";
   ctx.fill();
   ctx.restore();
 };
 
-const segments = 20;
+const pointAt = (p, i) => {
+  const a = p.angle - (p.speed * i) / 2;
+  const d = i * params.tailStep;
+  return [
+    centerX + (p.distance + d) * Math.cos(a),
+    centerY + (p.distance * params.squash + d) * Math.sin(a),
+  ];
+};
 
-// draw particles
 const drawParticles = () => {
-  particles.forEach((particle) => {
-    for (let i = 0; i < segments; i++) {
-      if (particle.distance > blackHoleRadius) {
-        ctx.beginPath();
-        ctx.moveTo(
-          centerX +
-            (particle.distance + (i - 1) * 0.1) *
-              Math.cos(particle.angle - (particle.speed * (i - 1)) / 2),
-          centerY +
-            (particle.distance / 2 + (i - 1) * 0.1) *
-              Math.sin(particle.angle - (particle.speed * (i - 1)) / 2)
-        );
-        ctx.lineTo(
-          centerX +
-            (particle.distance + i * 0.1) *
-              Math.cos(particle.angle - (particle.speed * i) / 2),
-          centerY +
-            (particle.distance / 2 + i * 0.1) *
-              Math.sin(particle.angle - (particle.speed * i) / 2),
-          2,
-          0,
-          Math.PI * 2
-        );
-        ctx.strokeStyle =
-          "rgba(255, 255, 255, " + (1 - i / segments) * particle.opacity + ")";
-        ctx.strokewidth = 1;
-        ctx.stroke();
-      }
+  ctx.strokeStyle = params.color;
+  ctx.lineWidth = params.lineWidth;
+  for (const p of particles) {
+    if (p.distance <= params.blackHoleRadius) continue;
+    for (let i = 0; i < params.segments; i++) {
+      const [x1, y1] = pointAt(p, i - 1);
+      const [x2, y2] = pointAt(p, i);
+      ctx.globalAlpha = (1 - i / params.segments) * p.opacity;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
     }
-  });
+  }
+  ctx.globalAlpha = 1;
 };
 
-// update particles
 const updateParticles = () => {
-  particles.forEach((particle) => {
-    if (particle.opacity < 1) {
-      particle.opacity += 0.001;
-    }
-    particle.angle += particle.speed / 2;
-    particle.distance -= particle.speed * 10;
-    particle.speed += 0.0001;
-    if (particle.distance < blackHoleRadius) {
-      particles.splice(particles.indexOf(particle), 1);
-    }
-  });
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.opacity = Math.min(1, p.opacity + params.opacityGain);
+    p.angle += p.speed * params.spinFactor;
+    p.distance -= p.speed * params.inwardFactor;
+    p.speed += params.speedGain;
+    if (p.distance < params.blackHoleRadius) particles.splice(i, 1);
+  }
 };
 
-// clear canvas
-const clearCanvas = () => {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+const step = () => {
+  frame++;
+  updateParticles();
+  if (frame % params.spawnEvery === 0) generateParticle();
 };
 
-// draw
+const skip = (n) => {
+  for (let i = 0; i < n; i++) step();
+};
+
 const draw = () => {
-  clearCanvas();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawParticles();
   drawBlackHole();
-  updateParticles();
 };
 
-let frame = 0;
-
-// loop
 const loop = () => {
-  frame++;
+  if (!params.paused) step();
   draw();
-  if (frame % 2 === 0) {
-    generateParticle();
-  }
   requestAnimationFrame(loop);
 };
 
 generateParticle();
-drawParticles();
-
-console.log(particles);
+createTweaks(params, schema, () => {});
 loop();
 
 window.addEventListener("resize", () => {
