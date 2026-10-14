@@ -110,3 +110,11 @@ function animate() {
 }
 
 animate();
+
+window.addEventListener("resize", () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = "white";
+  initImageData();
+});

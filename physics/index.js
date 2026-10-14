@@ -98,3 +98,9 @@ const animate = () => {
 };
 
 animate();
+
+window.addEventListener("resize", () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  ctx.strokeStyle = "white";
+});

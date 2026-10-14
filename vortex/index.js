@@ -5,8 +5,8 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth / 1;
 canvas.height = window.innerHeight / 1;
 
-const centerX = canvas.width / 2;
-const centerY = canvas.height / 2;
+let centerX = canvas.width / 2;
+let centerY = canvas.height / 2;
 
 const blackHoleRadius = 100;
 
@@ -116,3 +116,10 @@ drawParticles();
 
 console.log(particles);
 loop();
+
+window.addEventListener("resize", () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  centerX = canvas.width / 2;
+  centerY = canvas.height / 2;
+});

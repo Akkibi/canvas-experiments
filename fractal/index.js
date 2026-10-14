@@ -2,18 +2,7 @@
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
 
-// Set canvas dimensions
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
 const size = 100;
-const rows = canvas.width / size;
-const cols = canvas.height / size;
-const lineWidth = 3;
-const linePerSquare = 4;
-// draw a square
-
-ctx.strokeStyle = "white";
 
 function cercle(x, y, radius) {
   ctx.beginPath();
@@ -35,5 +24,12 @@ function dessineCercle(x, y, angle, rayon) {
   );
 }
 
-let angle = 0;
-dessineCercle(canvas.width / 2, 0, angle, size);
+const render = () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  ctx.strokeStyle = "white";
+  dessineCercle(canvas.width / 2, 0, 0, size);
+};
+
+render();
+window.addEventListener("resize", render);

@@ -51,3 +51,8 @@ export function drawGrid() {
 }
 
 drawGrid();
+
+window.addEventListener("resize", () => {
+  canvas.width = window.innerWidth - 9;
+  canvas.height = window.innerHeight - 9;
+});

@@ -10,8 +10,8 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 // Draw a circle
-const centerX = canvas.width / 2;
-const centerY = canvas.height / 2;
+let centerX = canvas.width / 2;
+let centerY = canvas.height / 2;
 
 // Loop
 let paused = false;
@@ -216,3 +216,10 @@ function animate(timestamp) {
 }
 
 animate();
+
+window.addEventListener("resize", () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  centerX = canvas.width / 2;
+  centerY = canvas.height / 2;
+});

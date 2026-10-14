@@ -233,3 +233,7 @@ function animate(timestamp) {
     requestAnimationFrame(animate);
   }
 }
+
+window.addEventListener("resize", () => {
+  height = window.innerHeight;
+});

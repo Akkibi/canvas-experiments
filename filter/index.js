@@ -86,6 +86,12 @@ const animate = () => {
 
 // animate();
 
+window.addEventListener("resize", () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    ctx.drawImage(background, 0, 0);
+});
+
 window.addEventListener("mousemove", (e) => {
     mouse.x = e.clientX;
     mouse.y = e.clientY;

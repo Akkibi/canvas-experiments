@@ -2,13 +2,7 @@
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
 
-// Set canvas dimensions
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
 const size = 50;
-const rows = canvas.width / size;
-const cols = canvas.height / size;
 const lineWidth = 3;
 const linePerSquare = 4;
 // draw a square
@@ -62,4 +56,11 @@ const drawSquareGrid = (rows, cols, size) => {
   }
 };
 
-drawSquareGrid(rows, cols, size);
+const render = () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  drawSquareGrid(canvas.width / size, canvas.height / size, size);
+};
+
+render();
+window.addEventListener("resize", render);

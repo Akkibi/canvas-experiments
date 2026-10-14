@@ -77,8 +77,8 @@ const draw = () => {
 
 const resize = () => {
   // Set canvas dimensions
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  canvas.width = window.innerWidth / 4;
+  canvas.height = window.innerHeight / 4;
   offscreenCanvas.width = canvas.width;
   offscreenCanvas.height = canvas.height;
 };

@@ -38,8 +38,8 @@ let offImageDataComposition = offCtxComposition.getImageData(
 );
 
 // Set the wave properties
-const waveX = canvas.width / 2;
-const waveY = canvas.height;
+let waveX = canvas.width / 2;
+let waveY = canvas.height;
 const waveSpeed = 0.3;
 const waveFrequency = 0.4;
 const waveAmplitude = 4;
@@ -145,3 +145,18 @@ function draw() {
 }
 
 draw();
+
+window.addEventListener("resize", () => {
+  const { innerWidth: w, innerHeight: h } = window;
+  for (const c of [canvas, offCtxText.canvas, offCtxWave.canvas, offCtxComposition.canvas]) {
+    c.width = w;
+    c.height = h;
+  }
+  waveX = w / 2;
+  waveY = h;
+  imageData = ctx.getImageData(0, 0, w, h);
+  offImageDataWave = offCtxWave.getImageData(0, 0, w, h);
+  drawText();
+  initImageData();
+  distortOffCtx();
+});

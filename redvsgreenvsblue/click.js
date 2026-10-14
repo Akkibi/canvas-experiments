@@ -104,3 +104,8 @@ const click = (event) => {
 };
 
 window.addEventListener("click", click);
+
+window.addEventListener("resize", () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});

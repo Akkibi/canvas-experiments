@@ -10,22 +10,23 @@ canvas.height = window.innerHeight;
 // offscreen canvas buffer
 const buffer = document.createElement("canvas");
 const bufferCtx = buffer.getContext("2d");
-buffer.width = canvas.height * 0.08;
-buffer.height = canvas.height * 0.08;
-bufferCtx // draw a blured circle on the buffer
-  .beginPath();
-bufferCtx.arc(
-  buffer.width / 2,
-  buffer.height / 2,
-  buffer.height / 4,
-  0,
-  2 * Math.PI,
-);
-bufferCtx.fillStyle = "white";
-bufferCtx.fill();
-bufferCtx.filter = `blur(${buffer.height / 8}px)`;
-bufferCtx.globalCompositeOperation = "source-over";
-bufferCtx.drawImage(buffer, 0, 0);
+const buildBuffer = () => {
+  buffer.width = canvas.height * 0.08;
+  buffer.height = canvas.height * 0.08;
+  bufferCtx.filter = `blur(${buffer.height / 16}px)`;
+  bufferCtx.beginPath();
+  bufferCtx.arc(
+    buffer.width / 2,
+    buffer.height / 2,
+    buffer.height / 4,
+    0,
+    2 * Math.PI,
+  );
+  bufferCtx.fillStyle = "white";
+  bufferCtx.fill();
+};
+
+buildBuffer();
 
 // draw the buffer on the canvas
 ctx.drawImage(buffer, 0, 0, buffer.width, buffer.height);
@@ -66,3 +67,9 @@ window.addEventListener("mousemove", (e) => {
 });
 
 console.log("hello wolrd");
+
+window.addEventListener("resize", () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  buildBuffer();
+});
