@@ -15,7 +15,7 @@ const theme = {
     highlight3: "#eafff2",
     vivid1: "#39ff8f",
   },
-  fonts: { mono: "ui-monospace, Menlo, Consolas, monospace" },
+  fonts: { mono: '"Cal Sans", sans-serif', sans: '"Cal Sans", sans-serif' },
 };
 
 const buildConfig = (params, schema) =>

@@ -1,31 +1,58 @@
-// Get the canvas element and its context
+import { createTweaks } from "../shared/tweaks.js";
+
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
 
-// Set canvas dimensions
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// main variables
-const density = 40;
-const rows = 10;
-const columns = 10;
+const params = {
+  density: 40,
+  rows: 10,
+  columns: 10,
+  startX: 100,
+  startY: 100,
+  stiffness: 0.02,
+  damping: 0.02,
+  gravity: 0.1,
+  bounce: 0.3,
+  friction: 0.9,
+  pinTopRow: false,
+  substeps: 4,
+  pointSize: 10,
+  showLinks: true,
+  color: "#ffffff",
+};
 
-const startPosition = { x: 100, y: 100 };
+const schema = {
+  density: { label: "spacing", min: 10, max: 100, step: 1 },
+  rows: { label: "rows", min: 2, max: 30, step: 1 },
+  columns: { label: "columns", min: 2, max: 30, step: 1 },
+  startX: { label: "start x", min: 0, max: 800, step: 1 },
+  startY: { label: "start y", min: 0, max: 800, step: 1 },
+  stiffness: { label: "stiffness", min: 0, max: 0.2, step: 0.001 },
+  damping: { label: "damping", min: 0, max: 0.2, step: 0.001 },
+  gravity: { label: "gravity", min: -0.5, max: 0.5, step: 0.01 },
+  bounce: { label: "bounce", min: 0, max: 1, step: 0.01 },
+  friction: { label: "floor friction", min: 0, max: 1, step: 0.01 },
+  pinTopRow: { label: "pin top row" },
+  substeps: { label: "substeps", min: 1, max: 10, step: 1 },
+  pointSize: { label: "point size", min: 2, max: 30, step: 1 },
+  showLinks: { label: "show links" },
+  color: { label: "color" },
+};
 
-ctx.strokeStyle = "white";
+let points = [];
+let gridKey = "";
 
-// create matrix of points
-const points = [];
-
-// fill the matrix with points
-const createPoints = (density, rows, columns) => {
-  for (let i = 0; i < rows; i++) {
+const buildGrid = () => {
+  points = [];
+  for (let i = 0; i < params.rows; i++) {
     const row = [];
-    for (let j = 0; j < columns; j++) {
+    for (let j = 0; j < params.columns; j++) {
       row.push({
-        x: i * density + startPosition.x,
-        y: j * density + startPosition.y,
+        x: j * params.density + params.startX,
+        y: i * params.density + params.startY,
         vx: 0,
         vy: 0,
       });
@@ -34,73 +61,98 @@ const createPoints = (density, rows, columns) => {
   }
 };
 
-createPoints(density, rows, columns);
+const syncGrid = () => {
+  const key = [params.rows, params.columns, params.density, params.startX, params.startY].join();
+  if (key === gridKey) return;
+  gridKey = key;
+  buildGrid();
+};
 
-// draw the points
-const drawPoints = () => {
-  points.forEach((row) => {
-    row.forEach((point) => {
-      ctx.beginPath();
-      ctx.rect(point.x - 5, point.y - 5, 10, 10);
-      ctx.fillStyle = "white";
-      ctx.fill();
+const spring = (a, b) => {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const distance = Math.hypot(dx, dy) || 0.0001;
+  const f = (distance - params.density) * params.stiffness;
+  const fx = (dx / distance) * f;
+  const fy = (dy / distance) * f;
+  a.vx += fx;
+  a.vy += fy;
+  b.vx -= fx;
+  b.vy -= fy;
+};
+
+const step = () => {
+  for (let i = 0; i < params.rows; i++) {
+    for (let j = 0; j < params.columns; j++) {
+      if (j + 1 < params.columns) spring(points[i][j], points[i][j + 1]);
+      if (i + 1 < params.rows) spring(points[i][j], points[i + 1][j]);
+    }
+  }
+
+  const damp = 1 - params.damping;
+  const floor = canvas.height;
+  const wall = canvas.width;
+  points.forEach((row, i) => {
+    row.forEach((p) => {
+      if (params.pinTopRow && i === 0) {
+        p.vx = 0;
+        p.vy = 0;
+        return;
+      }
+      p.vy += params.gravity;
+      p.vx *= damp;
+      p.vy *= damp;
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.y > floor) {
+        p.y = floor;
+        p.vy *= -params.bounce;
+        p.vx *= params.friction;
+      }
+      if (p.x < 0 || p.x > wall) {
+        p.x = Math.min(Math.max(p.x, 0), wall);
+        p.vx *= -params.bounce;
+      }
     });
   });
 };
 
-// update the points
-const updatePoints = () => {
-  points.forEach((row, colIndex) => {
-    row.forEach((point, rowIndex) => {
-      point.x += point.vx;
-      point.y += point.vy;
-
-      // define surouding points
-      const nextPoint = points[colIndex + 1] && points[colIndex + 1][rowIndex];
-      const prevPoint = points[colIndex - 1] && points[colIndex - 1][rowIndex];
-      const topPoint = points[colIndex] && points[colIndex][rowIndex - 1];
-      const bottomPoint = points[colIndex] && points[colIndex][rowIndex + 1];
-      const suroudingPoints = [nextPoint, prevPoint, topPoint, bottomPoint];
-
-      suroudingPoints.forEach((suroudingPoint) => {
-        if (suroudingPoint) {
-          const dx = suroudingPoint.x - point.x;
-          const dy = suroudingPoint.y - point.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          const force = 0.01;
-
-          // calculate acceleration
-          const ax = (dx / distance) * force;
-          const ay = (dy / distance) * force;
-
-          if (distance < density) {
-            point.vx -= ax;
-            point.vy -= ay;
-          } else {
-            point.vx += ax;
-            point.vy += ay;
-          }
-        }
-      });
-
-      point.vy += 0.1;
-      point.y = Math.min(point.y, canvas.height);
-    });
-  });
-};
-
-// animate
-const animate = () => {
+const draw = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawPoints();
-  updatePoints();
+  ctx.strokeStyle = params.color;
+  ctx.fillStyle = params.color;
+  if (params.showLinks) {
+    ctx.beginPath();
+    for (let i = 0; i < params.rows; i++) {
+      for (let j = 0; j < params.columns; j++) {
+        const p = points[i][j];
+        if (j + 1 < params.columns) {
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(points[i][j + 1].x, points[i][j + 1].y);
+        }
+        if (i + 1 < params.rows) {
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(points[i + 1][j].x, points[i + 1][j].y);
+        }
+      }
+    }
+    ctx.stroke();
+  }
+  const s = params.pointSize;
+  points.forEach((row) => row.forEach((p) => ctx.fillRect(p.x - s / 2, p.y - s / 2, s, s)));
+};
+
+const animate = () => {
+  for (let i = 0; i < params.substeps; i++) step();
+  draw();
   requestAnimationFrame(animate);
 };
 
+buildGrid();
+createTweaks(params, schema, syncGrid);
 animate();
 
 window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-  ctx.strokeStyle = "white";
 });

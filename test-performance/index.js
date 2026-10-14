@@ -1,3 +1,5 @@
+import { createTweaks } from "../shared/tweaks.js";
+
 // Get the canvas element and its context
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
@@ -9,9 +11,28 @@ canvas.height = window.innerHeight;
 let centerX = canvas.width / 2;
 let centerY = canvas.height / 2;
 
-// Set the number of particles
-const ParticleRate = 1;
-let speedMultiplier = 1;
+const params = {
+  particlesPerFrame: 5,
+  speedMultiplier: 1,
+  acceleration: 0.01,
+  hue: 220,
+  stretchRate: 0.06,
+  maxStretch: 40,
+  releaseLerp: 0.08,
+};
+
+const schema = {
+  particlesPerFrame: { label: "particles / frame", min: 1, max: 50, step: 1 },
+  speedMultiplier: { label: "speed", min: 0.1, max: 10, step: 0.1 },
+  acceleration: { label: "acceleration", min: 0, max: 0.1, step: 0.001 },
+  hue: { label: "hue", min: 0, max: 360, step: 1 },
+  stretchRate: { label: "space stretch rate", min: 0.01, max: 0.3, step: 0.01 },
+  maxStretch: { label: "max stretch", min: 1, max: 200, step: 1 },
+  releaseLerp: { label: "release lerp", min: 0.01, max: 0.5, step: 0.01 },
+};
+
+let stretch = 1;
+let spaceDown = false;
 const particles = [];
 
 const generateParticles = () => {
@@ -22,7 +43,7 @@ const generateParticles = () => {
     startDistance: startDistance,
     speed: speed,
     angle: angle,
-    color: 220,
+    color: params.hue,
     opacity: 0,
     oldPos: {
       x: centerX + Math.cos(angle) * startDistance,
@@ -52,9 +73,11 @@ const updateParticles = () => {
       (particle.newPos.x - centerX) ** 2 + (particle.newPos.y - centerY) ** 2
     );
     const size = (distance / (canvas.height / 2)) * 2 + 1;
+    const tail =
+      (particle.speed * params.speedMultiplier) * (stretch - 1);
     drawParticles(
-      particle.oldPos.x - Math.cos(particle.angle) * 2,
-      particle.oldPos.y - Math.sin(particle.angle) * 2,
+      particle.oldPos.x - Math.cos(particle.angle) * (2 + tail),
+      particle.oldPos.y - Math.sin(particle.angle) * (2 + tail),
       particle.newPos.x + Math.cos(particle.angle) * 2,
       particle.newPos.y + Math.sin(particle.angle) * 2,
       size + 2,
@@ -63,23 +86,23 @@ const updateParticles = () => {
     particle.oldPos.x = particle.newPos.x;
     particle.oldPos.y = particle.newPos.y;
     particle.newPos.x +=
-      Math.cos(particle.angle) * particle.speed * speedMultiplier;
+      Math.cos(particle.angle) * particle.speed * params.speedMultiplier;
     particle.newPos.y +=
-      Math.sin(particle.angle) * particle.speed * speedMultiplier;
-    particle.speed += 0.01 + (canvas.width - particle.startDistance) / 10000;
+      Math.sin(particle.angle) * particle.speed * params.speedMultiplier;
+    particle.speed += params.acceleration + (canvas.width - particle.startDistance) / 10000;
     if (particle.opacity < 1) {
       particle.opacity += 0.05;
     }
     drawParticles(
-      particle.oldPos.x - Math.cos(particle.angle),
-      particle.oldPos.y - Math.sin(particle.angle),
+      particle.oldPos.x - Math.cos(particle.angle) * (1 + tail),
+      particle.oldPos.y - Math.sin(particle.angle) * (1 + tail),
       particle.newPos.x + Math.cos(particle.angle),
       particle.newPos.y + Math.sin(particle.angle),
       size,
       "hsla(" +
         particle.color +
         "deg, 100%," +
-        Math.abs(speedMultiplier * 2 + 50) +
+        Math.abs(params.speedMultiplier * 2 + 50) +
         "%, " +
         particle.opacity +
         ")"
@@ -92,6 +115,7 @@ const updateParticles = () => {
       particle.oldPos.y > canvas.height
     ) {
       particles.splice(i, 1);
+      i--;
     }
   }
 };
@@ -113,16 +137,19 @@ const drawBorder = () => {
 
 const draw = () => {
   time++;
-  // if (speedMultiplier > 2) {
-  //   for (let i = 0; i < speedMultiplier; i++) {
+  // if (params.speedMultiplier > 2) {
+  //   for (let i = 0; i < params.speedMultiplier; i++) {
   //     generateParticles();
   //   }
   // } else {
-  //   if (time % Math.round(1 / speedMultiplier) === 0) {
+  //   if (time % Math.round(1 / params.speedMultiplier) === 0) {
   //     generateParticles();
   //   }
   // }
-  for (let i = 0; i < 5; i++) {
+  stretch = spaceDown
+    ? Math.min(params.maxStretch, stretch * (1 + params.stretchRate))
+    : stretch + (1 - stretch) * params.releaseLerp;
+  for (let i = 0; i < params.particlesPerFrame; i++) {
     generateParticles();
   }
   updateParticles();
@@ -132,9 +159,23 @@ const draw = () => {
 
 draw();
 
+const isTyping = (e) => e.target instanceof HTMLElement && e.target.matches("input, textarea");
+
+window.addEventListener("keydown", (e) => {
+  if (e.code !== "Space" || isTyping(e)) return;
+  e.preventDefault();
+  spaceDown = true;
+});
+
+window.addEventListener("keyup", (e) => {
+  if (e.code === "Space") spaceDown = false;
+});
+
+createTweaks(params, schema, () => {});
+
 window.addEventListener("wheel", (e) => {
-  speedMultiplier += e.deltaY / 1000;
-  speedMultiplier = Math.max(0.1, speedMultiplier);
+  params.speedMultiplier += e.deltaY / 1000;
+  params.speedMultiplier = Math.max(0.1, params.speedMultiplier);
 });
 
 window.addEventListener("resize", () => {

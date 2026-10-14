@@ -6,7 +6,7 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-import { createTweaks } from "./tweaks.js";
+import { createTweaks } from "../shared/tweaks.js";
 import { hullPath, linkGeometry, tangentLines } from "./geometry.js";
 import { buildSvg, downloadSvg } from "./export.js";
 

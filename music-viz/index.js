@@ -1,4 +1,29 @@
 import { SimplexNoise } from "./simplexNoise.js";
+import { createTweaks } from "../shared/tweaks.js";
+
+const params = {
+  renderScale: 1,
+  radiusInset: 100,
+  noiseScale: 400,
+  noiseAmount: 20,
+  timeSpeed: 0.1,
+  bandWidth: 10,
+  bandR: 0.56,
+  bandG: 0.6,
+  bandB: 0.64,
+};
+
+const schema = {
+  renderScale: { label: "render scale", min: 0.25, max: 1, step: 0.05 },
+  radiusInset: { label: "radius inset", min: 0, max: 400, step: 1 },
+  noiseScale: { label: "noise scale", min: 50, max: 1000, step: 10 },
+  noiseAmount: { label: "noise amount", min: 0, max: 100, step: 1 },
+  timeSpeed: { label: "time speed", min: 0, max: 0.5, step: 0.01 },
+  bandWidth: { label: "band sharpness", min: 1, max: 30, step: 0.5 },
+  bandR: { label: "red band", min: 0, max: 1, step: 0.01 },
+  bandG: { label: "green band", min: 0, max: 1, step: 0.01 },
+  bandB: { label: "blue band", min: 0, max: 1, step: 0.01 },
+};
 
 const simplexX = new SimplexNoise(0);
 const simplexY = new SimplexNoise(1);
@@ -8,8 +33,8 @@ const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
 
 // Set canvas dimensions
-canvas.width = window.innerWidth / 1;
-canvas.height = window.innerHeight / 1;
+canvas.width = window.innerWidth * params.renderScale;
+canvas.height = window.innerHeight * params.renderScale;
 
 let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
@@ -62,27 +87,27 @@ function drawCircleWave(originX, originY, r, time) {
 
       const pixel = (y * canvas.width + x) * 4;
 
-      const noiseX = simplexX.noise(x / 400, time);
-      const noiseY = simplexY.noise(y / 400, time);
+      const noiseX = simplexX.noise(x / params.noiseScale, time);
+      const noiseY = simplexY.noise(y / params.noiseScale, time);
 
       const color = {
-        r: 255 - Math.abs((distance / r - 0.56) * 10 * 255),
-        g: 255 - Math.abs((distance / r - 0.6) * 10 * 255),
-        b: 255 - Math.abs((distance / r - 0.64) * 10 * 255),
+        r: 255 - Math.abs((distance / r - params.bandR) * params.bandWidth * 255),
+        g: 255 - Math.abs((distance / r - params.bandG) * params.bandWidth * 255),
+        b: 255 - Math.abs((distance / r - params.bandB) * params.bandWidth * 255),
       };
 
       const newPointColor = {
         r: Math.max(
           0,
-          Math.min(255, color.r + (((noiseX + noiseY) * distance) / r) * 20)
+          Math.min(255, color.r + (((noiseX + noiseY) * distance) / r) * params.noiseAmount)
         ),
         g: Math.max(
           0,
-          Math.min(255, color.g + (((noiseY + noiseX) * distance) / r) * 20)
+          Math.min(255, color.g + (((noiseY + noiseX) * distance) / r) * params.noiseAmount)
         ),
         b: Math.max(
           0,
-          Math.min(255, color.b + (((noiseX + noiseY) * distance) / r) * 20)
+          Math.min(255, color.b + (((noiseX + noiseY) * distance) / r) * params.noiseAmount)
         ),
       };
 
@@ -98,23 +123,28 @@ initImageData();
 
 let time = 0;
 function animate() {
-  time += 0.1;
+  time += params.timeSpeed;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawCircleWave(
     canvas.width / 2,
     canvas.height / 2,
-    canvas.height / 2 - 100,
+    Math.max(10, Math.min(canvas.width, canvas.height) / 2 - params.radiusInset * params.renderScale),
     time
   );
   requestAnimationFrame(animate);
 }
 
-animate();
-
-window.addEventListener("resize", () => {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+const resize = () => {
+  canvas.width = window.innerWidth * params.renderScale;
+  canvas.height = window.innerHeight * params.renderScale;
   imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   ctx.strokeStyle = "white";
   initImageData();
+};
+
+animate();
+createTweaks(params, schema, () => {
+  if (canvas.width !== Math.floor(window.innerWidth * params.renderScale)) resize();
 });
+
+window.addEventListener("resize", resize);

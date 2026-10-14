@@ -1,100 +1,105 @@
-// create a simple canvas setup
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
+import { createTweaks } from "../shared/tweaks.js";
 
-const mouse = {
-    x: 0,
-    y: 0,
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d", { willReadFrequently: true });
+
+const mouse = { x: 0, y: 0 };
+
+const params = {
+  mode: "smear",
+  width: 100,
+  height: 100,
+  pixelSize: 4,
+  offset: 20,
+  tapDistance: 1,
+  showCoords: true,
 };
 
-// define size of the canvas
+const schema = {
+  mode: { label: "mode", options: ["smear", "pixelate"] },
+  width: { label: "width", min: 10, max: 600, step: 1 },
+  height: { label: "height", min: 10, max: 600, step: 1 },
+  pixelSize: { label: "pixel size", min: 1, max: 40, step: 1 },
+  offset: { label: "brightness offset", min: -100, max: 100, step: 1 },
+  tapDistance: { label: "tap distance", min: 1, max: 10, step: 1 },
+  showCoords: { label: "show coords" },
+};
+
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// load an image for background
 const background = new Image();
 background.src = "./images/background.jpg";
+background.onload = () => redraw();
 
-// put the image in the canvas
-ctx.drawImage(background, 0, 0);
+const region = () => {
+  const x = Math.round(mouse.x - params.width / 2);
+  const y = Math.round(mouse.y - params.height / 2);
+  return { x, y, w: Math.round(params.width), h: Math.round(params.height) };
+};
 
 const drawPixelate = () => {
-    const width = 100;
-    const height = 100;
-    const pixelSize = 4;
-
-    const startPos = { x: mouse.x - width / 2, y: mouse.y - height / 2 };
-    const endPos = { x: mouse.x + width / 2, y: mouse.y + height / 2 };
-
-    for (let x = startPos.x; x < endPos.x; x += pixelSize) {
-        for (let y = startPos.y; y < endPos.y; y += pixelSize) {
-            // ctx.getColorAt(x, y);
-            const pixelColor = ctx.getImageData(x, y, 1, 1).data;
-            ctx.fillStyle = "rgb(" + pixelColor[0] + "," + pixelColor[1] + "," + pixelColor[2] + ")";
-            // console.log(ctx.getImageData(x, y, 1, 1).data);
-            ctx.fillRect(x, y, pixelSize, pixelSize);
-        }
+  const { x, y, w, h } = region();
+  const size = params.pixelSize;
+  const img = ctx.getImageData(x, y, w, h);
+  for (let px = 0; px < w; px += size) {
+    for (let py = 0; py < h; py += size) {
+      const i = (py * w + px) * 4;
+      ctx.fillStyle = `rgb(${img.data[i]},${img.data[i + 1]},${img.data[i + 2]})`;
+      ctx.fillRect(x + px, y + py, size, size);
     }
-    ctx.fillStyle = "#f00";
-    ctx.fill();
+  }
 };
 
-const drawFilter = () => {
-    const width = 100;
-    const height = 100;
-    const pixelSize = 1;
+const drawSmear = () => {
+  const d = params.tapDistance;
+  const pad = d * 2;
+  const { x, y, w, h } = region();
+  const ox = x - pad;
+  const oy = y - pad;
+  const bw = w + 1 + pad;
+  const bh = h + 1 + pad;
+  const img = ctx.getImageData(ox, oy, bw, bh);
+  const data = img.data;
+  const at = (px, py) => ((py - oy) * bw + (px - ox)) * 4;
 
-    const startPos = { x: mouse.x - width / 2, y: mouse.y - height / 2 };
-    const endPos = { x: mouse.x + width / 2, y: mouse.y + height / 2 };
-
-    for (let x = startPos.x; x <= endPos.x; x += pixelSize) {
-        for (let y = startPos.y; y <= endPos.y; y += pixelSize) {
-            // ctx.getColorAt(x, y);
-            const pixelColor = ctx.getImageData(x, y, 1, 1).data;
-            const pixelBisColor = ctx.getImageData(x - 1, y - 1, 1, 1).data;
-            const pixelBisBisColor = ctx.getImageData(x - 2, y - 2, 1, 1).data;
-            const newColor = [
-                (20 + pixelColor[0] + pixelBisColor[0] + pixelBisBisColor[0]) / 3,
-                (20 + pixelColor[1] + pixelBisColor[1] + pixelBisBisColor[1]) / 3,
-                (20 + pixelColor[2] + pixelBisColor[2] + pixelBisBisColor[2]) / 3,
-            ]
-            ctx.fillStyle = "rgb(" + newColor[0] + "," + newColor[1] + "," + newColor[2] + ")";
-
-            // console.log(ctx.getImageData(x, y, 1, 1).data);
-            ctx.fillRect(x - 0, y - 0, pixelSize, pixelSize);
-        }
+  for (let px = x; px <= x + w; px++) {
+    for (let py = y; py <= y + h; py++) {
+      const i = at(px, py);
+      const j = at(px - d, py - d);
+      const k = at(px - 2 * d, py - 2 * d);
+      for (let c = 0; c < 3; c++) {
+        data[i + c] = (params.offset + data[i + c] + data[j + c] + data[k + c]) / 3;
+      }
     }
-    ctx.fill();
+  }
+  ctx.putImageData(img, ox, oy);
 };
 
-const animate = () => {
-    // requestAnimationFrame(animate);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+function redraw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(background, 0, 0);
 
-    // draw the background
-    ctx.drawImage(background, 0, 0);
-
-    // draw the mouse position
+  if (params.showCoords) {
     ctx.fillStyle = "#fff";
-    ctx.font = "30px Arial";
+    ctx.font = '30px "Cal Sans", sans-serif';
     ctx.fillText(`(${mouse.x}, ${mouse.y})`, 10, 30);
+  }
 
-    // draw a circle at the mouse position
-    drawFilter();
+  if (params.mode === "pixelate") drawPixelate();
+  else drawSmear();
+}
 
-};
-
-// animate();
+createTweaks(params, schema, redraw);
 
 window.addEventListener("resize", () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    ctx.drawImage(background, 0, 0);
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  redraw();
 });
 
 window.addEventListener("mousemove", (e) => {
-    mouse.x = e.clientX;
-    mouse.y = e.clientY;
-    animate()
-    console.log(mouse.x, mouse.y)
+  mouse.x = e.clientX;
+  mouse.y = e.clientY;
+  redraw();
 });
