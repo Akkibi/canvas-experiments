@@ -11,7 +11,7 @@ const veil = createDarkVeil({
   hueShift: 0,
   speed: 0.4,
   warpAmount: 0.3,
-  noiseIntensity: 0.015,
+  noiseIntensity: 0,
 });
 
 const scene = new Scene();

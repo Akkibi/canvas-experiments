@@ -2,7 +2,7 @@
 import {
   Fn, clamp, cos, dot, exp, float, fract, length, max, mix, radians, sin, smoothstep, uniform, vec2, vec3, vec4, uv,
 } from "three/tsl";
-import { MeshBasicNodeMaterial, Mesh, PlaneGeometry, Vector2 } from "three/webgpu";
+import { Color, MeshBasicNodeMaterial, Mesh, PlaneGeometry, Vector2 } from "three/webgpu";
 import { stochasticOffset } from "./stochastic.js";
 
 const CPPN = [
@@ -66,6 +66,8 @@ const createDarkVeilMaterial = () => {
     lightMode: uniform(0),
     blur: uniform(0),
     seed: uniform(0),
+    tint: uniform(new Color("#3d8bff")),
+    tintAmount: uniform(1),
   };
 
   const material = new MeshBasicNodeMaterial({ depthWrite: false });
@@ -88,7 +90,8 @@ const createDarkVeilMaterial = () => {
     const coverage = smoothstep(0.08, 0.82, energy);
     const ink = mix(hue.mul(0.32), hue.mul(0.78), smoothstep(0, 1, energy));
     const light = mix(vec3(1), ink, coverage.mul(0.82));
-    return vec4(mix(result, light, u.lightMode), 1);
+    const tinted = mix(result, u.tint.mul(energy), u.tintAmount);
+    return vec4(mix(tinted, light, u.lightMode), 1);
   })();
 
   return { material, u };
