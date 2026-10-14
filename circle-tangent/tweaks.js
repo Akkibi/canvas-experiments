@@ -1,57 +1,45 @@
-const STYLE = `
-#tweaks{position:fixed;top:16px;right:16px;width:240px;font:12px ui-monospace,Menlo,Consolas,monospace;color:#c9f2d9;background:rgba(11,20,16,.85);border:1px solid #14301f;border-radius:6px;backdrop-filter:blur(6px);user-select:none}
-#tweaks summary{cursor:pointer;padding:8px 12px;color:#39ff8f;letter-spacing:.08em;text-transform:uppercase;font-size:11px}
-#tweaks .rows{padding:4px 12px 12px;display:grid;gap:8px}
-#tweaks label{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center}
-#tweaks input[type=range]{grid-column:1/-1;width:100%;accent-color:#39ff8f;margin:0}
-#tweaks input[type=checkbox]{accent-color:#39ff8f}
-#tweaks input[type=color]{width:32px;height:20px;border:1px solid #14301f;background:none;padding:0}
-#tweaks output{color:#6f9c82}
-`;
+import React, { useEffect } from "https://esm.sh/react@18.3.1";
+import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
+import { Leva, useControls } from "https://esm.sh/leva@0.10.0?deps=react@18.3.1,react-dom@18.3.1";
+
+const theme = {
+  colors: {
+    elevation1: "#0b1410",
+    elevation2: "#060a08",
+    elevation3: "#14301f",
+    accent1: "#1f8a52",
+    accent2: "#39ff8f",
+    accent3: "#39ff8f",
+    highlight1: "#6f9c82",
+    highlight2: "#c9f2d9",
+    highlight3: "#eafff2",
+    vivid1: "#39ff8f",
+  },
+  fonts: { mono: "ui-monospace, Menlo, Consolas, monospace" },
+};
+
+const buildConfig = (params, schema) =>
+  Object.fromEntries(
+    Object.entries(schema).map(([key, def]) => [
+      key,
+      typeof params[key] === "number"
+        ? { value: params[key], min: def.min, max: def.max, step: def.step, label: def.label }
+        : { value: params[key], label: def.label },
+    ]),
+  );
 
 export const createTweaks = (params, schema, onChange) => {
-  const style = document.createElement("style");
-  style.textContent = STYLE;
-  document.head.appendChild(style);
-
-  const root = document.createElement("details");
-  root.id = "tweaks";
-  root.open = true;
-  root.innerHTML = `<summary>Tweaks</summary><div class="rows"></div>`;
-  const rows = root.querySelector(".rows");
-
-  for (const [key, def] of Object.entries(schema)) {
-    const label = document.createElement("label");
-    const out = document.createElement("output");
-    const input = document.createElement("input");
-    label.append(def.label, out);
-
-    if (typeof params[key] === "boolean") {
-      input.type = "checkbox";
-      input.checked = params[key];
-      out.remove();
-      label.append(input);
-    } else if (typeof params[key] === "string") {
-      input.type = "color";
-      input.value = params[key];
-      out.remove();
-      label.append(input);
-    } else {
-      Object.assign(input, { type: "range", min: def.min, max: def.max, step: def.step });
-      input.value = params[key];
-      out.textContent = params[key];
-      label.append(input);
-    }
-
-    input.addEventListener("input", () => {
-      params[key] =
-        input.type === "checkbox" ? input.checked : input.type === "range" ? Number(input.value) : input.value;
-      out.textContent = params[key];
+  const Panel = () => {
+    const values = useControls(buildConfig(params, schema));
+    useEffect(() => {
+      Object.assign(params, values);
       onChange();
-    });
-    rows.appendChild(label);
-  }
+    }, [values]);
+    return React.createElement(Leva, { theme, titleBar: { title: "Tweaks" } });
+  };
 
-  document.body.appendChild(root);
-  return root;
+  const host = document.createElement("div");
+  host.id = "tweaks";
+  document.body.appendChild(host);
+  createRoot(host).render(React.createElement(Panel));
 };
