@@ -37,7 +37,11 @@ export const createTweaks = (params, schema, onChange) => {
       Object.assign(params, values);
       onChange();
     }, [values]);
-    return React.createElement(Leva, { theme, titleBar: { title: "Tweaks" } });
+    return React.createElement(Leva, {
+      theme,
+      titleBar: { title: "Tweaks" },
+      hidden: new URLSearchParams(location.search).has("thumb"),
+    });
   };
 
   const host = document.createElement("div");

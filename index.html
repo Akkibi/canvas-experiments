@@ -216,6 +216,25 @@
         transition: opacity 0.2s ease;
       }
 
+      .card {
+        isolation: isolate;
+      }
+
+      .card .thumb {
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background-size: cover;
+        background-position: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+      }
+
+      .card:hover .thumb {
+        opacity: 1;
+      }
+
       .filler {
         pointer-events: none;
       }
@@ -417,6 +436,7 @@
         a.className = "card";
         a.href = `./${p.slug}/index.html`;
         a.innerHTML = `
+          <div class="thumb" style="background-image: linear-gradient(rgba(6, 8, 16, 0.6), rgba(6, 8, 16, 0.6)), url('./thumbs/${p.slug}.jpg')"></div>
           <span class="arrow">&#8599;</span>
           <div class="index">${String(i + 1).padStart(2, "0")}</div>
           <h2>${p.name}</h2>
