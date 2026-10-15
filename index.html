@@ -227,12 +227,14 @@
         background-size: cover;
         background-position: center;
         opacity: 0;
-        transition: opacity 0.3s ease;
+        transform: scale(1.2);
+        transition: opacity 0.4s ease, transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
         pointer-events: none;
       }
 
       .card:hover .thumb {
         opacity: 1;
+        transform: scale(1);
       }
 
       .filler {

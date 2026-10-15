@@ -128,6 +128,7 @@ const loop = () => {
 };
 
 generateParticle();
+if (new URLSearchParams(location.search).has("thumb")) skip(4000);
 createTweaks(params, schema, () => {});
 loop();
 
