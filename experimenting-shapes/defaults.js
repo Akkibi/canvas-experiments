@@ -7,7 +7,7 @@ export const INITIAL_PARAMS = {
 export const INITIAL_CIRCLES = [
   {
     radius: 400,
-    color: "#0000ffff",
+    color: "#000020ff",
     textColor: "#ffffffff",
     anchorX: "center",
     anchorY: "center",
