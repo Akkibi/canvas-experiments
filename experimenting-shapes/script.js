@@ -1,25 +1,17 @@
-// Get the canvas element
+import { createTweaks } from "../shared/tweaks.js";
+import { params, shapes, circles, texts, buildSchema, isCollapsed, setItemsListener } from "./state.js";
+import { fitText, anchorOrigin, circlePoints, shapeLayout, shapePoints, circlePositions } from "./geometry.js";
+import { buildSvg, downloadSvg, copyParameters } from "./export.js";
+
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-console.log(isMobile ? "You are on Mobile" : "You are on Desktop");
-
-// Set canvas dimensions
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// Draw a circle
-let centerX = canvas.width / 2;
-let centerY = canvas.height / 2;
-
-// Loop
-let paused = false;
-let lastFrameTime = 0;
-const fpsInterval = 1000 / 48;
-
-// Draw
-const precision = 0.25;
+let hitCircles = [];
+let selectedKey = null;
+let now = 0;
 
 const drawCircle = (x, y, radius, color, thickness) => {
   ctx.beginPath();
@@ -35,191 +27,165 @@ const drawCircle = (x, y, radius, color, thickness) => {
   }
 };
 
-// Draw an arc
-const drawArc = (x, y, radius, startAngle, endAngle, precision, clockwise) => {
-  if (clockwise) {
-    for (let i = startAngle; i < endAngle; i += precision) {
-      const dx = x + radius * Math.cos(i);
-      const dy = y + radius * Math.sin(i);
-      ctx.lineTo(dx, dy);
-    }
-  } else {
-    for (let i = endAngle; i > startAngle; i -= precision) {
-      const dx = x + radius * Math.cos(i);
-      const dy = y + radius * Math.sin(i);
-      ctx.lineTo(dx, dy);
-    }
-  }
+const drawLabel = (key, x, y, radius, color) => {
+  const text = texts.get(key) ?? "";
+  const selected = key === selectedKey;
+  if ((!text && !selected) || radius <= 0) return;
+  const { size, width } = fitText(ctx, text, radius);
+  ctx.fillStyle = color;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, x, y);
+  if (!selected) return;
+  drawCircle(x, y, radius + 3, color, 2);
+  if (Math.floor(now / 500) % 2 === 0) ctx.fillRect(x + width / 2 + 2, y - size / 2, 2, size);
 };
 
-// draw a shape
-const drawShape = (
-  x,
-  y,
-  borderRadius,
-  radius,
-  firstAngle,
-  secondAngle,
-  color,
-  width,
-) => {
-  ctx.beginPath();
-  ctx.strokeStyle = color;
-  ctx.lineWidth = width;
-  const startPosition = {
-    x: x + radius * Math.cos(firstAngle),
-    y: y + radius * Math.sin(firstAngle),
-  };
-  const endPosition = {
-    x: x + radius * Math.cos(secondAngle),
-    y: y + radius * Math.sin(secondAngle),
-  };
-  drawArc(
-    x,
-    y,
-    radius + borderRadius,
-    firstAngle,
-    secondAngle,
-    precision / 4,
-    false,
-  );
-  drawArc(
-    startPosition.x,
-    startPosition.y,
-    borderRadius,
-    Math.PI + firstAngle,
-    Math.PI * 2 + firstAngle,
-    precision,
-    false,
-  );
-  drawArc(
-    x,
-    y,
-    radius - borderRadius,
-    firstAngle,
-    secondAngle,
-    precision / 4,
-    true,
-  );
-  drawArc(
-    endPosition.x,
-    endPosition.y,
-    borderRadius,
-    secondAngle,
-    Math.PI + secondAngle,
-    precision,
-    false,
-  );
+const drawPolygonCircle = (x, y, radius, color) => {
+  circlePoints(x, y, radius, params.precision).forEach((p, i) => {
+    if (i) ctx.lineTo(p.x, p.y);
+    else {
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+    }
+  });
   ctx.closePath();
-  ctx.stroke();
+  ctx.fillStyle = color;
+  ctx.fill();
 };
 
-const drawCircles = (
-  x,
-  y,
-  borderRadius,
-  radius,
-  firstAngle,
-  secondAngle,
-  count,
-) => {
-  const angleDiff = (secondAngle - firstAngle) / (count - 1);
-  for (let i = 0; i < count; i++) {
-    const dx = x + radius * Math.cos(firstAngle + angleDiff * i);
-    const dy = y + radius * Math.sin(firstAngle + angleDiff * i);
-    drawCircle(dx, dy, borderRadius - 5, "#aaaaff");
+const drawLabeledCircle = (key, x, y, radius, color, textColor, polygon = false) => {
+  if (polygon) drawPolygonCircle(x, y, radius, color);
+  else drawCircle(x, y, radius, color);
+  hitCircles.push({ key, x, y, radius });
+  drawLabel(key, x, y, radius, textColor);
+};
+
+const addPath = ({ shape, x, y, first, second }) => {
+  shapePoints(shape, x, y, first, second, params.precision).forEach((p, i) => {
+    if (i) ctx.lineTo(p.x, p.y);
+    else ctx.moveTo(p.x, p.y);
+  });
+  ctx.closePath();
+};
+
+const tracePath = (layout) => {
+  ctx.beginPath();
+  addPath(layout);
+};
+
+const drawOutline = (layout) => {
+  const { shape } = layout;
+  if (!shape.outline) return;
+  ctx.save();
+  ctx.beginPath();
+  if (shape.outlineSide === "outset") ctx.rect(0, 0, canvas.width, canvas.height);
+  addPath(layout);
+  ctx.clip("evenodd");
+  tracePath(layout);
+  ctx.strokeStyle = shape.outlineColor;
+  ctx.lineWidth = shape.outlineWidth * 2;
+  ctx.stroke();
+  ctx.restore();
+};
+
+const drawFullShape = (layout) => {
+  const { shape, x, y, first, second } = layout;
+  tracePath(layout);
+  if (shape.fill) {
+    ctx.fillStyle = shape.fillColor;
+    ctx.fill();
+  }
+  ctx.strokeStyle = shape.color;
+  ctx.lineWidth = shape.lineWidth;
+  ctx.stroke();
+  for (const c of circlePositions(shape, x, y, first, second)) {
+    drawLabeledCircle(c.key, c.x, c.y, c.radius, shape.circleColor, shape.textColor);
   }
 };
-
-const radius = isMobile ? 300 : 600;
-const firstAngle = -Math.PI + Math.PI / 5;
-const secondAngle = -Math.PI / 5;
-// drawShape(
-//   centerX,
-//   canvas.height + radius / 1.25,
-//   30,
-//   radius,
-//   -Math.PI + Math.PI / 3,
-//   -Math.PI / 3,
-//   "blue",
-// 2
-// );
 
 const clicks = [];
 
-window.addEventListener("click", (e) => {
-  const x = e.clientX;
-  const y = e.clientY;
-  clicks.push({ x, y, size: 10 });
-  console.log(clicks);
-});
-
-let framecount = 0;
-function animate(timestamp) {
-  if (!timestamp) {
-    requestAnimationFrame(animate);
-  }
-  const deltaTime = timestamp - lastFrameTime;
-  if (deltaTime > fpsInterval) {
-    lastFrameTime = timestamp;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    //// ctx.beginPath();
-    //// ctx.rect(0, 0, canvas.width, canvas.height);
-    //// ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
-    //// ctx.fill();
-    // update time stuffs
-    framecount++;
-    drawShape(
-      centerX,
-      canvas.height + radius / (isMobile ? 1.5 : 1.3),
-      30,
-      radius,
-      firstAngle + Math.sin(framecount / 100) * 0.05,
-      secondAngle + Math.sin(-framecount / 100) * 0.05,
-      "#aaaaff",
-      2,
-    );
-    drawCircles(
-      centerX,
-      canvas.height + radius / (isMobile ? 1.5 : 1.3),
-      30,
-      radius,
-      firstAngle + Math.sin(framecount / 100) * 0.05,
-      secondAngle + Math.sin(-framecount / 100) * 0.05,
+const drawClicks = () => {
+  for (let i = clicks.length - 1; i >= 0; i--) {
+    const click = clicks[i];
+    drawCircle(
+      click.x,
+      click.y,
+      click.size,
+      `hsla(180deg, 100%, ${100 - click.size}%, ${0.5 - click.size * 0.015})`,
       4,
     );
-    drawCircle(centerX, centerY, 100, "blue");
-
-    //click
-    clicks.forEach((click, index) => {
-      drawCircle(
-        click.x,
-        click.y,
-        click.size,
-        "hsla(180deg, 100%, " +
-          (100 - click.size) +
-          "%, " +
-          (0.5 - click.size * 0.015) +
-          ")",
-        4,
-      );
-      click.size += 3.5;
-      if (click.size > 50) {
-        clicks.splice(index, 1);
-      }
-    });
-    // end
+    click.size += 3.5;
+    if (click.size > 50) clicks.splice(i, 1);
   }
-  if (!paused) {
-    requestAnimationFrame(animate);
-  }
-}
+};
 
-animate();
+let framecount = 0;
+let lastFrameTime = 0;
+
+const animate = (timestamp) => {
+  requestAnimationFrame(animate);
+  if (timestamp - lastFrameTime <= 1000 / params.fps) return;
+  lastFrameTime = timestamp;
+  now = timestamp;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  hitCircles = [];
+  if (!params.paused) framecount++;
+
+  const layouts = shapes.map((shape) => shapeLayout(shape, canvas.width, canvas.height, framecount));
+  circles.forEach((circle) => {
+    const { x, y } = anchorOrigin(circle, canvas.width, canvas.height);
+    drawLabeledCircle(`c${circle.id}`, x, y, circle.radius, circle.color, circle.textColor, true);
+  });
+  layouts.forEach(drawOutline);
+  layouts.forEach(drawFullShape);
+  drawClicks();
+};
+
+const isPanelEvent = (e) => e.target.closest?.("#tweaks, input, textarea");
+
+window.addEventListener("click", (e) => {
+  if (isPanelEvent(e)) return;
+  clicks.push({ x: e.clientX, y: e.clientY, size: 10 });
+  const hit = hitCircles.findLast(
+    (c) => Math.hypot(e.clientX - c.x, e.clientY - c.y) <= c.radius,
+  );
+  if (!hit) {
+    selectedKey = null;
+  } else if (texts.has(hit.key)) {
+    texts.delete(hit.key);
+    selectedKey = null;
+  } else {
+    selectedKey = hit.key;
+  }
+});
+
+window.addEventListener("keydown", (e) => {
+  if (!selectedKey || isPanelEvent(e) || e.ctrlKey || e.metaKey || e.altKey) return;
+  const text = texts.get(selectedKey) ?? "";
+  if (e.key === "Escape" || e.key === "Enter") {
+    selectedKey = null;
+  } else if (e.key === "Backspace") {
+    if (text.length > 1) texts.set(selectedKey, text.slice(0, -1));
+    else texts.delete(selectedKey);
+  } else if (e.key.length === 1) {
+    texts.set(selectedKey, text + e.key);
+  } else {
+    return;
+  }
+  e.preventDefault();
+});
+
+const actions = {
+  exportSvg: () => downloadSvg(buildSvg(ctx, canvas.width, canvas.height, framecount)),
+  copyParameters,
+};
+const tweaks = createTweaks(params, buildSchema(actions), () => {}, isCollapsed);
+setItemsListener(() => tweaks.refresh(buildSchema(actions), isCollapsed));
+requestAnimationFrame(animate);
 
 window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-  centerX = canvas.width / 2;
-  centerY = canvas.height / 2;
 });

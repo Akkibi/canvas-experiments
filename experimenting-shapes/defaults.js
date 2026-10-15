@@ -1,0 +1,82 @@
+export const INITIAL_PARAMS = {
+  paused: false,
+  fps: 48,
+  precision: 0.25,
+};
+
+export const INITIAL_CIRCLES = [
+  {
+    radius: 400,
+    color: "#0000ffff",
+    textColor: "#ffffffff",
+    anchorX: "center",
+    anchorY: "center",
+    x: 0,
+    y: 0,
+  },
+];
+
+const shape = (overrides) => ({
+  radius: 182,
+  borderRadius: 30,
+  anchorX: "center",
+  anchorY: "bottom",
+  x: 0,
+  y: 0,
+  lineWidth: 2,
+  color: "#aaaaffff",
+  centerAngle: -90,
+  amplitudeAngle: 21,
+  wobbleAmount: 0.05,
+  wobbleSpeed: 100,
+  circleCount: 4,
+  circleInset: 5,
+  circleColor: "#aaaaffff",
+  textColor: "#000000ff",
+  fill: false,
+  fillColor: "#aaaaff40",
+  outline: false,
+  outlineSide: "outset",
+  outlineWidth: 16,
+  outlineColor: "#aaaaff40",
+  ...overrides,
+});
+
+export const INITIAL_SHAPES = [
+  shape({
+    radius: 600,
+    borderRadius: 50,
+    y: 480,
+    lineWidth: 10,
+    color: "#7aff00ff",
+    circleInset: 22,
+    circleColor: "#7aff00ff",
+    outline: true,
+    outlineSide: "inset",
+    outlineColor: "#7aff0030",
+  }),
+  shape({
+    anchorX: "left",
+    x: 250,
+    y: -250,
+    centerAngle: 135,
+    amplitudeAngle: 50,
+  }),
+  shape({
+    borderRadius: 32,
+    anchorX: "right",
+    x: -250,
+    y: -250,
+    lineWidth: 2,
+    color: "#000000ff",
+    centerAngle: 45,
+    amplitudeAngle: 50,
+    circleInset: 7,
+    circleColor: "#ffffffff",
+    fill: true,
+    fillColor: "#ffffffab",
+    outline: true,
+    outlineWidth: 2.5,
+    outlineColor: "#ffffffff",
+  }),
+];
