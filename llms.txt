@@ -1,0 +1,34 @@
+# Canvas Experiments
+
+> Canvas Experiments (canvatek) is a gallery of 16 small creative coding sketches by Akira Valade, each a standalone page written in vanilla JavaScript on the HTML Canvas 2D API: soft-body physics, boids flocking, fractal spirals, pixel filters, per-pixel ripples, particle effects, SVG shape editors and a color game. Everything runs in the browser with no build step and no account; nine sketches have a live tweaks panel to change their parameters.
+
+- Site: https://canvatek.akkibi.art/
+- Author: Akira Valade (@akkibi) https://akkibi.art
+- Source code: https://github.com/Akkibi/canvas-experiments
+- Stack: vanilla JavaScript ES modules and the Canvas 2D API, no bundler. The home page background is Three.js r180 (WebGPU renderer, TSL) loaded from jsDelivr; tweaks panels use Leva via esm.sh; Red vs Green vs Blue uses GSAP and Tailwind CSS from a CDN.
+- License: none stated in the repository.
+
+## Experiments
+
+- [Algue](https://canvatek.akkibi.art/algue/): drag to grow seaweed strands from a mound on a deep blue gradient; they sway with simplex noise and laplacian smoothing. Click a strand tip to retract it.
+- [Automatic Bands](https://canvatek.akkibi.art/automatic-bands/): mint-green bands random-walk in from the screen edges and wander endlessly, smoothed by a laplacian pass with soft shadows, recycled once they leave.
+- [Blending Shapes](https://canvatek.akkibi.art/blending-shapes/): 100 colored arrow triangles flock with boids rules (alignment, cohesion, separation); a button switches the screen edges between reject, bounce and wrap.
+- [Circle Tangent](https://canvatek.akkibi.art/circle-tangent/): drag to draw circles and link them with outer tangent lines or filled hulls; click a circle to unlink or delete it. Tweak radius, colors and gaps, export SVG.
+- [Drop Mouse](https://canvatek.akkibi.art/drop-mouse/): work-in-progress test for a fluid hover effect: a blurred white glow follows the cursor on a canvas layered behind a text page with pill buttons.
+- [Experimenting Shapes](https://canvatek.akkibi.art/experimenting-shapes/): editor for rounded arc shapes with wobble, fill and outline, each holding a row of circles you can type labels into. Set anchors and colors, export SVG or copy the parameters.
+- [Filter](https://canvatek.akkibi.art/filter/): move the mouse over a fur-and-eye illustration to smear or pixelate the pixels under a box, using canvas getImageData, with adjustable box and pixel size.
+- [Fractal](https://canvatek.akkibi.art/fractal/): a spiral of hundreds of shrinking circles or polygons, each step offset by its radius along a turning angle. Tweak shrink rate, angle step, sides and fill.
+- [Image Manipulation](https://canvatek.akkibi.art/image-manipulation/): a pulsing letter is drawn offscreen, then rebuilt pixel by pixel into sparse scanlines with shifted color channels. Press any key to swap the letter.
+- [Music Viz](https://canvatek.akkibi.art/music-viz/): a per-pixel ring of offset red, green and blue bands forming a glowing halo that shimmers with animated simplex noise. Visual study only; it does not read audio yet.
+- [Pattern](https://canvatek.akkibi.art/pattern/): procedural basket-weave: a grid of squares filled with parallel lines, alternately rotated, with gaps at each crossing for an over-under look. Fully tweakable.
+- [Physics](https://canvatek.akkibi.art/physics/): a grid of mass points tied by structural, shear and bend springs falls, bounces and can be dragged and thrown. Drop an image onto it to texture the mesh; gravity, bounce and a pinned top row are tweakable.
+- [Red vs Green vs Blue](https://canvatek.akkibi.art/redvsgreenvsblue/): bet on a color, then watch 100 triangles convert each other on contact, rock-paper-scissors style (green beats red, blue beats green, red beats blue) until one color fills the board. Space pauses.
+- [Test Performance](https://canvatek.akkibi.art/test-performance/): particles stream out from the screen center like a warp-speed starfield. Hold Space to stretch them into hyperspace streaks and scroll to change their speed.
+- [Vortex](https://canvatek.akkibi.art/vortex/): white particle trails spiral inward on a flattened orbit, speeding up until they vanish into a central black hole. Spawn rate, spin and trail length are tweakable.
+- [Wave](https://canvatek.akkibi.art/wave/): concentric ripples radiate from the bottom of a blue field and bend the word AKIRA, computed pixel by pixel every frame with canvas ImageData.
+
+## How to use
+
+- The [home page](https://canvatek.akkibi.art/) lists every experiment as a card with a thumbnail; each opens as its own full-screen page.
+- Interaction is mouse and keyboard: drag, click, scroll or press keys as described above. Sketches with a tweaks panel (Circle Tangent, Experimenting Shapes, Filter, Fractal, Music Viz, Pattern, Physics, Test Performance, Vortex) show a "Tweaks" panel in the top-right corner; add `?thumb` to the URL to hide it.
+- Most sketches use mouse events; Algue, Circle Tangent and Physics use pointer events and also respond to touch.

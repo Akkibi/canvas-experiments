@@ -3,11 +3,26 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Canvas Experiments</title>
-    <meta
-      name="description"
-      content="A collection of creative coding experiments — canvas, shaders, physics, and generative visuals."
-    />
+    <title>Canvas Experiments · Creative coding sketches by Akira Valade</title>
+    <meta name="description" content="16 creative coding sketches in vanilla JavaScript and HTML canvas: soft-body physics, boids flocking, fractals, pixel filters, ripples and a color game." />
+    <link rel="canonical" href="https://canvatek.akkibi.art/" />
+    <meta name="author" content="Akira Valade" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Canvas Experiments" />
+    <meta property="og:title" content="Canvas Experiments · Creative coding sketches by Akira Valade" />
+    <meta property="og:description" content="16 creative coding sketches in vanilla JavaScript and HTML canvas: soft-body physics, boids flocking, fractals, pixel filters, ripples and a color game." />
+    <meta property="og:url" content="https://canvatek.akkibi.art/" />
+    <meta property="og:image" content="https://canvatek.akkibi.art/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Six canvas experiments: a pixel filter on a furry eye, green bands, a circle spiral, a glowing ring, rippled AKIRA text and a particle vortex." />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Canvas Experiments · Creative coding sketches by Akira Valade" />
+    <meta name="twitter:description" content="16 creative coding sketches in vanilla JavaScript and HTML canvas: soft-body physics, boids flocking, fractals, pixel filters, ripples and a color game." />
+    <meta name="twitter:image" content="https://canvatek.akkibi.art/og-image.jpg" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="theme-color" content="#000000" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -323,6 +338,96 @@
       }
     </style>
       <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://canvatek.akkibi.art/#website",
+          "url": "https://canvatek.akkibi.art/",
+          "name": "Canvas Experiments",
+          "alternateName": "Canvatek",
+          "description": "16 creative coding sketches in vanilla JavaScript and HTML canvas: soft-body physics, boids flocking, fractals, pixel filters, ripples and a color game.",
+          "inLanguage": "en",
+          "author": {
+            "@id": "https://akkibi.art/#person"
+          }
+        },
+        {
+          "@type": "CollectionPage",
+          "@id": "https://canvatek.akkibi.art/#collection",
+          "url": "https://canvatek.akkibi.art/",
+          "name": "Canvas Experiments · Creative coding sketches by Akira Valade",
+          "description": "16 creative coding sketches in vanilla JavaScript and HTML canvas: soft-body physics, boids flocking, fractals, pixel filters, ripples and a color game.",
+          "image": "https://canvatek.akkibi.art/og-image.jpg",
+          "inLanguage": "en",
+          "isAccessibleForFree": true,
+          "author": {
+            "@id": "https://akkibi.art/#person"
+          },
+          "isPartOf": {
+            "@id": "https://canvatek.akkibi.art/#website"
+          },
+          "mainEntity": {
+            "@type": "ItemList",
+            "numberOfItems": 16,
+            "itemListElement": [
+              {"@type": "ListItem", "position": 1, "item": {"@type": "CreativeWork", "@id": "https://canvatek.akkibi.art/algue/", "name": "Algue", "url": "https://canvatek.akkibi.art/algue/", "description": "Drag to grow seaweed strands from a mound on a deep blue gradient; they sway with simplex noise and laplacian smoothing. Click a strand tip to retract it.", "image": "https://canvatek.akkibi.art/thumbs/algue.jpg", "author": {"@id": "https://akkibi.art/#person"}}},
+              {"@type": "ListItem", "position": 2, "item": {"@type": "CreativeWork", "@id": "https://canvatek.akkibi.art/automatic-bands/", "name": "Automatic Bands", "url": "https://canvatek.akkibi.art/automatic-bands/", "description": "Mint-green bands random-walk in from the screen edges and wander endlessly, smoothed by a laplacian pass with soft shadows, recycled once they leave.", "image": "https://canvatek.akkibi.art/thumbs/automatic-bands.jpg", "author": {"@id": "https://akkibi.art/#person"}}},
+              {"@type": "ListItem", "position": 3, "item": {"@type": "CreativeWork", "@id": "https://canvatek.akkibi.art/blending-shapes/", "name": "Blending Shapes", "url": "https://canvatek.akkibi.art/blending-shapes/", "description": "100 colored arrow triangles flock with boids rules (alignment, cohesion, separation); a button switches the screen edges between reject, bounce and wrap.", "image": "https://canvatek.akkibi.art/thumbs/blending-shapes.jpg", "author": {"@id": "https://akkibi.art/#person"}}},
+              {"@type": "ListItem", "position": 4, "item": {"@type": "CreativeWork", "@id": "https://canvatek.akkibi.art/circle-tangent/", "name": "Circle Tangent", "url": "https://canvatek.akkibi.art/circle-tangent/", "description": "Drag to draw circles and link them with outer tangent lines or filled hulls; click a circle to unlink or delete it. Tweak radius, colors and gaps, export SVG.", "image": "https://canvatek.akkibi.art/thumbs/circle-tangent.jpg", "author": {"@id": "https://akkibi.art/#person"}}},
+              {"@type": "ListItem", "position": 5, "item": {"@type": "CreativeWork", "@id": "https://canvatek.akkibi.art/drop-mouse/", "name": "Drop Mouse", "url": "https://canvatek.akkibi.art/drop-mouse/", "description": "Work-in-progress test for a fluid hover effect: a blurred white glow follows the cursor on a canvas layered behind a text page with pill buttons.", "image": "https://canvatek.akkibi.art/thumbs/drop-mouse.jpg", "author": {"@id": "https://akkibi.art/#person"}}},
+              {"@type": "ListItem", "position": 6, "item": {"@type": "CreativeWork", "@id": "https://canvatek.akkibi.art/experimenting-shapes/", "name": "Experimenting Shapes", "url": "https://canvatek.akkibi.art/experimenting-shapes/", "description": "Editor for rounded arc shapes with wobble, fill and outline, each holding a row of circles you can type labels into. Set anchors and colors, then export SVG.", "image": "https://canvatek.akkibi.art/thumbs/experimenting-shapes.jpg", "author": {"@id": "https://akkibi.art/#person"}}},
+              {"@type": "ListItem", "position": 7, "item": {"@type": "CreativeWork", "@id": "https://canvatek.akkibi.art/filter/", "name": "Filter", "url": "https://canvatek.akkibi.art/filter/", "description": "Move the mouse over a fur-and-eye illustration to smear or pixelate the pixels under a box, using canvas getImageData, with adjustable box and pixel size.", "image": "https://canvatek.akkibi.art/thumbs/filter.jpg", "author": {"@id": "https://akkibi.art/#person"}}},
+              {"@type": "ListItem", "position": 8, "item": {"@type": "CreativeWork", "@id": "https://canvatek.akkibi.art/fractal/", "name": "Fractal", "url": "https://canvatek.akkibi.art/fractal/", "description": "A spiral of hundreds of shrinking circles or polygons, each step offset by its radius along a turning angle. Tweak shrink rate, angle step, sides and fill.", "image": "https://canvatek.akkibi.art/thumbs/fractal.jpg", "author": {"@id": "https://akkibi.art/#person"}}},
+              {"@type": "ListItem", "position": 9, "item": {"@type": "CreativeWork", "@id": "https://canvatek.akkibi.art/image-manipulation/", "name": "Image Manipulation", "url": "https://canvatek.akkibi.art/image-manipulation/", "description": "A pulsing letter is drawn offscreen, then rebuilt pixel by pixel into sparse scanlines with shifted color channels. Press any key to swap the letter.", "image": "https://canvatek.akkibi.art/thumbs/image-manipulation.jpg", "author": {"@id": "https://akkibi.art/#person"}}},
+              {"@type": "ListItem", "position": 10, "item": {"@type": "CreativeWork", "@id": "https://canvatek.akkibi.art/music-viz/", "name": "Music Viz", "url": "https://canvatek.akkibi.art/music-viz/", "description": "A per-pixel ring on canvas: offset red, green and blue bands form a glowing halo that shimmers with animated simplex noise. Visual study, no audio input yet.", "image": "https://canvatek.akkibi.art/thumbs/music-viz.jpg", "author": {"@id": "https://akkibi.art/#person"}}},
+              {"@type": "ListItem", "position": 11, "item": {"@type": "CreativeWork", "@id": "https://canvatek.akkibi.art/pattern/", "name": "Pattern", "url": "https://canvatek.akkibi.art/pattern/", "description": "Procedural basket-weave: a grid of squares filled with parallel lines, alternately rotated, with gaps at each crossing for an over-under look. Fully tweakable.", "image": "https://canvatek.akkibi.art/thumbs/pattern.jpg", "author": {"@id": "https://akkibi.art/#person"}}},
+              {"@type": "ListItem", "position": 12, "item": {"@type": "CreativeWork", "@id": "https://canvatek.akkibi.art/physics/", "name": "Physics", "url": "https://canvatek.akkibi.art/physics/", "description": "A grid of mass points tied by structural, shear and bend springs falls, bounces and can be dragged and thrown. Drop an image onto it to texture the mesh.", "image": "https://canvatek.akkibi.art/thumbs/physics.jpg", "author": {"@id": "https://akkibi.art/#person"}}},
+              {"@type": "ListItem", "position": 13, "item": {"@type": "CreativeWork", "@id": "https://canvatek.akkibi.art/redvsgreenvsblue/", "name": "Red vs Green vs Blue", "url": "https://canvatek.akkibi.art/redvsgreenvsblue/", "description": "Bet on a color, then watch 100 red, green and blue triangles convert each other on contact, rock-paper-scissors style, until a single color fills the board.", "image": "https://canvatek.akkibi.art/thumbs/redvsgreenvsblue.jpg", "author": {"@id": "https://akkibi.art/#person"}}},
+              {"@type": "ListItem", "position": 14, "item": {"@type": "CreativeWork", "@id": "https://canvatek.akkibi.art/test-performance/", "name": "Test Performance", "url": "https://canvatek.akkibi.art/test-performance/", "description": "Particles stream out from the screen center like a warp-speed starfield. Hold Space to stretch them into hyperspace streaks and scroll to change their speed.", "image": "https://canvatek.akkibi.art/thumbs/test-performance.jpg", "author": {"@id": "https://akkibi.art/#person"}}},
+              {"@type": "ListItem", "position": 15, "item": {"@type": "CreativeWork", "@id": "https://canvatek.akkibi.art/vortex/", "name": "Vortex", "url": "https://canvatek.akkibi.art/vortex/", "description": "White particle trails spiral inward on a flattened orbit, speeding up until they vanish into a central black hole. Spawn rate, spin and trail length tweakable.", "image": "https://canvatek.akkibi.art/thumbs/vortex.jpg", "author": {"@id": "https://akkibi.art/#person"}}},
+              {"@type": "ListItem", "position": 16, "item": {"@type": "CreativeWork", "@id": "https://canvatek.akkibi.art/wave/", "name": "Wave", "url": "https://canvatek.akkibi.art/wave/", "description": "Concentric ripples radiate from the bottom of a blue field and bend the word AKIRA, computed pixel by pixel every frame with canvas ImageData.", "image": "https://canvatek.akkibi.art/thumbs/wave.jpg", "author": {"@id": "https://akkibi.art/#person"}}}
+            ]
+          }
+        },
+        {
+          "@type": "SoftwareSourceCode",
+          "@id": "https://canvatek.akkibi.art/#source",
+          "name": "canvas-experiments",
+          "description": "Source of the Canvas Experiments site: standalone HTML + vanilla JavaScript canvas sketches, no build step.",
+          "codeRepository": "https://github.com/Akkibi/canvas-experiments",
+          "url": "https://github.com/Akkibi/canvas-experiments",
+          "programmingLanguage": [
+            "JavaScript",
+            "HTML",
+            "CSS"
+          ],
+          "runtimePlatform": "Web browser",
+          "author": {
+            "@id": "https://akkibi.art/#person"
+          },
+          "about": {
+            "@id": "https://canvatek.akkibi.art/#collection"
+          }
+        },
+        {
+          "@type": "Person",
+          "@id": "https://akkibi.art/#person",
+          "name": "Akira Valade",
+          "alternateName": "Akkibi",
+          "url": "https://akkibi.art/",
+          "jobTitle": "Creative developer",
+          "sameAs": [
+            "https://www.linkedin.com/in/akkibi/",
+            "https://github.com/Akkibi",
+            "https://www.instagram.com/akkibi_/"
+          ]
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <canvas id="bg"></canvas>
@@ -340,6 +445,26 @@
       </header>
 
       <div class="grid" id="grid"></div>
+      <noscript>
+        <ul>
+          <li><a href="./algue/">Algue</a>: Drag to grow seaweed strands from a mound on a deep blue gradient; they sway with simplex noise and laplacian smoothing. Click a strand tip to retract it.</li>
+          <li><a href="./automatic-bands/">Automatic Bands</a>: Mint-green bands random-walk in from the screen edges and wander endlessly, smoothed by a laplacian pass with soft shadows, recycled once they leave.</li>
+          <li><a href="./blending-shapes/">Blending Shapes</a>: 100 colored arrow triangles flock with boids rules (alignment, cohesion, separation); a button switches the screen edges between reject, bounce and wrap.</li>
+          <li><a href="./circle-tangent/">Circle Tangent</a>: Drag to draw circles and link them with outer tangent lines or filled hulls; click a circle to unlink or delete it. Tweak radius, colors and gaps, export SVG.</li>
+          <li><a href="./drop-mouse/">Drop Mouse</a>: Work-in-progress test for a fluid hover effect: a blurred white glow follows the cursor on a canvas layered behind a text page with pill buttons.</li>
+          <li><a href="./experimenting-shapes/">Experimenting Shapes</a>: Editor for rounded arc shapes with wobble, fill and outline, each holding a row of circles you can type labels into. Set anchors and colors, then export SVG.</li>
+          <li><a href="./filter/">Filter</a>: Move the mouse over a fur-and-eye illustration to smear or pixelate the pixels under a box, using canvas getImageData, with adjustable box and pixel size.</li>
+          <li><a href="./fractal/">Fractal</a>: A spiral of hundreds of shrinking circles or polygons, each step offset by its radius along a turning angle. Tweak shrink rate, angle step, sides and fill.</li>
+          <li><a href="./image-manipulation/">Image Manipulation</a>: A pulsing letter is drawn offscreen, then rebuilt pixel by pixel into sparse scanlines with shifted color channels. Press any key to swap the letter.</li>
+          <li><a href="./music-viz/">Music Viz</a>: A per-pixel ring on canvas: offset red, green and blue bands form a glowing halo that shimmers with animated simplex noise. Visual study, no audio input yet.</li>
+          <li><a href="./pattern/">Pattern</a>: Procedural basket-weave: a grid of squares filled with parallel lines, alternately rotated, with gaps at each crossing for an over-under look. Fully tweakable.</li>
+          <li><a href="./physics/">Physics</a>: A grid of mass points tied by structural, shear and bend springs falls, bounces and can be dragged and thrown. Drop an image onto it to texture the mesh.</li>
+          <li><a href="./redvsgreenvsblue/">Red vs Green vs Blue</a>: Bet on a color, then watch 100 red, green and blue triangles convert each other on contact, rock-paper-scissors style, until a single color fills the board.</li>
+          <li><a href="./test-performance/">Test Performance</a>: Particles stream out from the screen center like a warp-speed starfield. Hold Space to stretch them into hyperspace streaks and scroll to change their speed.</li>
+          <li><a href="./vortex/">Vortex</a>: White particle trails spiral inward on a flattened orbit, speeding up until they vanish into a central black hole. Spawn rate, spin and trail length tweakable.</li>
+          <li><a href="./wave/">Wave</a>: Concentric ripples radiate from the bottom of a blue field and bend the word AKIRA, computed pixel by pixel every frame with canvas ImageData.</li>
+        </ul>
+      </noscript>
 
       <footer>
         source on
